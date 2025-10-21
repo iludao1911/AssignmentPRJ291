@@ -5,14 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Đăng nhập Hệ thống</title>
-    <style>
-        .container { width: 300px; margin: 100px auto; padding: 20px; border: 1px solid #ccc; }
-        .error { color: red; font-weight: bold; }
-    </style>
+    <style> /* ... style CSS ... */ </style>
 </head>
 <body>
     <div class="container">
-        <h2>Đăng nhập Nhân viên</h2>
+        <h2>Đăng nhập Hệ thống</h2>
+        <p>Vui lòng nhập Mã/Tên đăng nhập và Mật khẩu.</p>
         
         <c:if test="${not empty error}">
             <p class="error">Lỗi: <c:out value="${error}" /></p>
@@ -20,7 +18,7 @@
         
         <form action="login" method="post">
             <p>
-                <label for="username">Tên đăng nhập:</label><br>
+                <label for="username">Tên/Mã đăng nhập:</label><br>
                 <input type="text" id="username" name="username" required>
             </p>
             <p>

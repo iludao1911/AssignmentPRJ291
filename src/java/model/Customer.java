@@ -1,22 +1,19 @@
 package model;
 
+// public class Customer { ... } 
+// (Giả định đã có cột password trong lớp này để khớp với DB)
 public class Customer {
 
     private int customerId;
     private String name;
     private String email;
     private String phone;
+    private String password;
 
     public Customer() {
     }
 
-    public Customer(int customerId, String name, String email, String phone) {
-        this.customerId = customerId;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-    }
-
+    // Getters and Setters...
     public int getCustomerId() {
         return customerId;
     }
@@ -49,5 +46,11 @@ public class Customer {
         this.phone = phone;
     }
 
-  
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

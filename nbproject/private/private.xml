@@ -4,23 +4,28 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/MedicineServiceImpl.java</file>
-            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/controller/MedicineServlet.java</file>
-            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/dao/CustomerDAO.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/web/login.jsp</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/IEmployeeService.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/controller/SupplierServlet.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/dao/SupplierDAO.java</file>
-            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/model/Employee.java</file>
-            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/model/Medicine.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/ICustomerService.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/web/index.jsp</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/CustomerServiceImpl.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/dao/DBConnection.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/model/Customer.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/SupplierServiceImpl.java</file>
-            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/ISupplierService.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/web/customer-view-products.jsp</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/dao/MedicineDAO.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/EmployeeServiceImpl.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/dao/EmployeeDAO.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/controller/CustomerServlet.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/web/customer-login.jsp</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/controller/MedicineServlet.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/dao/CustomerDAO.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/model/Employee.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/model/Medicine.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/ISupplierService.java</file>
+            <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/controller/LoginServlet.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/model/Supplier.java</file>
             <file>file:/D:/KHOA_FPT/FALL25/PRJ301/asm/src/java/service/IMedicineService.java</file>
         </group>

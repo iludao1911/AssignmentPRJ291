@@ -17,12 +17,13 @@ CREATE TABLE Supplier (
     email NVARCHAR(255)
 );
 GO
-SELECT * FROM Supplier WHERE Supplier_id = 1;
+
 INSERT INTO Supplier (name, address, phone, email)
 VALUES
 (N'Công ty Dược Trung Ương', N'Hà Nội', '0123456789', 'contact@duoc1.vn'),
 (N'Công ty Dược Mekophar', N'TP. Hồ Chí Minh', '0987654321', 'info@mekophar.vn'),
 (N'Công ty Dược Traphaco', N'Hà Nội', '0909123456', 'support@traphaco.com');
+
 
 select * from Supplier
 -- -----------------------------------------------------
@@ -82,6 +83,15 @@ CREATE TABLE Customer (
     phone VARCHAR(20)
 );
 GO
+ALTER TABLE Customer
+ADD password VARCHAR(255);
+GO
+INSERT INTO Customer (name, email, phone, password)
+VALUES
+(N'Lê Văn Khách', 'khachhang01@example.com', '0901112222', 'khach123'),
+(N'Phạm Thị Hàng', 'khachhang02@example.com', '0903334444', 'hang456');
+GO
+select *from customer
 
 -- -----------------------------------------------------
 -- Table: Employee
@@ -94,7 +104,15 @@ CREATE TABLE Employee (
     role NVARCHAR(100)
 );
 GO
-
+-- INSERTs cập nhật: loại bỏ tên cá nhân khỏi full_name
+INSERT INTO Employee (username, password, full_name, role)
+VALUES 
+('admin', '123', NULL, 'Admin');
+INSERT INTO Employee (username, password, full_name, role)
+VALUES 
+('nhanvien', '123', NULL, 'Pharmacist'); -- tên cá nhân đã được loại bỏ
+GO
+select * from Employee
 -- -----------------------------------------------------
 -- Table: [Order]
 -- -----------------------------------------------------
@@ -138,4 +156,4 @@ CREATE TABLE ChatLog (
     FOREIGN KEY (Employee_id) REFERENCES Employee(Employee_id),
     FOREIGN KEY (Customer_id) REFERENCES Customer(Customer_id)
 );
-GO
+GO 

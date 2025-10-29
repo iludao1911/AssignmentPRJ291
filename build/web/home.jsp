@@ -200,6 +200,26 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        .cart-link {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: 3px;
+            right: 8px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
         /* User Avatar Dropdown */
         .user-menu {
             position: relative;
@@ -812,6 +832,17 @@
         if (userObj instanceof model.User) {
             currentUser = (model.User) userObj;
         }
+        
+        // Lấy số lượng giỏ hàng
+        int cartCount = 0;
+        if (currentUser != null) {
+            try {
+                dao.CartDAO cartDAO = new dao.CartDAO();
+                cartCount = cartDAO.getCartCount(currentUser.getUserId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     %>
 
     <!-- Header -->
@@ -833,8 +864,9 @@
             <div class="header-actions">
                 <% if (currentUser != null) { %>
                     <!-- Giỏ hàng -->
-                    <a href="cart-view.jsp">
+                    <a href="cart-view.jsp" class="cart-link">
                         <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count"><%= cartCount %></span>
                         <span>Giỏ hàng</span>
                     </a>
                     

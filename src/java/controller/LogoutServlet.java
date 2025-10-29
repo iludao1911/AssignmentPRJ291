@@ -24,14 +24,13 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate();
         }
         
-        // Redirect the user to the login page
-        response.sendRedirect(request.getContextPath() + "/login");
+        // Redirect to home page
+        response.sendRedirect(request.getContextPath() + "/home.jsp");
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // In case a POST request is sent, handle it the same as GET
         doGet(request, response);
     }
 }

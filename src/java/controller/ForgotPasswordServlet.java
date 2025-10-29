@@ -1,109 +1,102 @@
 package controller;
 
-import dao.CustomerDAO;
+import dao.UserDAO;
+import dao.VerificationTokenDAO;
+import model.User;
+import model.VerificationToken;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import model.Customer;
-import service.CustomerServiceImpl;
-import service.ICustomerService;
-
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.UUID;
 
 @WebServlet("/forgot-password")
 public class ForgotPasswordServlet extends HttpServlet {
-    
-    private ICustomerService customerService;
-    
+
+    private UserDAO userDAO = new UserDAO();
+    private VerificationTokenDAO tokenDAO = new VerificationTokenDAO();
+
     @Override
-    public void init() throws ServletException {
-        this.customerService = new CustomerServiceImpl(new CustomerDAO());
-    }
-    
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/forgot-password.jsp").forward(request, response);
+        request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
     }
-    
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String action = request.getParameter("action");
+        String email = request.getParameter("email");
+        
+        // Validation
+        if (email == null || email.trim().isEmpty()) {
+            request.setAttribute("error", "Vui lòng nhập địa chỉ email");
+            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+            return;
+        }
+        
+        if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            request.setAttribute("error", "Địa chỉ email không hợp lệ");
+            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+            return;
+        }
         
         try {
-            if ("reset".equals(action)) {
-                handlePasswordReset(request, response);
-            } else {
-                handleForgotPassword(request, response);
+            // Kiểm tra email có tồn tại không
+            User user = userDAO.getUserByEmail(email);
+            
+            if (user == null) {
+                // Không tìm thấy user nhưng vẫn hiển thị success để tránh leak thông tin
+                request.setAttribute("success", "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn. Vui lòng kiểm tra hộp thư.");
+                request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+                return;
             }
+            
+            // Xóa các token reset password cũ
+            tokenDAO.deleteTokensByUserAndType(user.getUserId(), VerificationToken.PASSWORD_RESET);
+            
+            // Tạo token mới
+            String token = UUID.randomUUID().toString();
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.HOUR, 1); // Token có hiệu lực 1 giờ
+            
+            VerificationToken resetToken = new VerificationToken(
+                user.getUserId(),
+                token,
+                VerificationToken.PASSWORD_RESET,
+                calendar.getTime()
+            );
+            
+            boolean tokenCreated = tokenDAO.createToken(resetToken);
+            
+            if (tokenCreated) {
+                // Gửi email
+                boolean emailSent = service.EmailService.sendPasswordResetEmail(
+                    user.getEmail(),
+                    user.getName(),
+                    token
+                );
+                
+                if (emailSent) {
+                    request.setAttribute("success", "Link đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.");
+                } else {
+                    request.setAttribute("error", "Không thể gửi email. Vui lòng thử lại sau.");
+                }
+            } else {
+                request.setAttribute("error", "Có lỗi xảy ra. Vui lòng thử lại.");
+            }
+            
+            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
+            
         } catch (SQLException e) {
-            request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
-            request.getRequestDispatcher("/forgot-password.jsp").forward(request, response);
-        }
-    }
-    
-    private void handleForgotPassword(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException, SQLException {
-        
-        String name = request.getParameter("name");
-        String email = request.getParameter("email");
-
-    Customer customer = customerService.findByEmail(email);
-
-        if (customer != null && customer.getName() != null && customer.getName().equalsIgnoreCase(name)) {
-            // Lưu ID vào session để dùng khi reset
-            HttpSession session = request.getSession();
-            session.setAttribute("resetCustomerId", customer.getCustomerId());
-            
-            // Chuyển đến trang đặt lại mật khẩu
-            request.setAttribute("customerId", customer.getCustomerId());
-            request.getRequestDispatcher("/reset-password.jsp").forward(request, response);
-        } else {
-            request.setAttribute("error", "Không tìm thấy tài khoản với thông tin này");
-            request.getRequestDispatcher("/forgot-password.jsp").forward(request, response);
-        }
-    }
-    
-    private void handlePasswordReset(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException, SQLException {
-        
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("resetCustomerId") == null) {
-            response.sendRedirect("forgot-password");
-            return;
-        }
-        
-        int customerId = (Integer) session.getAttribute("resetCustomerId");
-        String newPassword = request.getParameter("newPassword");
-        String confirmPassword = request.getParameter("confirmPassword");
-        
-        if (!newPassword.equals(confirmPassword)) {
-            request.setAttribute("error", "Mật khẩu xác nhận không khớp");
-            request.setAttribute("customerId", customerId);
-            request.getRequestDispatcher("/reset-password.jsp").forward(request, response);
-            return;
-        }
-        
-        // Cập nhật mật khẩu
-        boolean updated = ((CustomerServiceImpl)customerService).updatePassword(customerId, newPassword);
-        
-        if (updated) {
-            // Xóa session để không thể dùng lại link reset
-            session.removeAttribute("resetCustomerId");
-            
-            // Thông báo thành công và chuyển về trang đăng nhập
-            request.setAttribute("success", "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.");
-            request.getRequestDispatcher("/customerLogin").forward(request, response);
-        } else {
-            request.setAttribute("error", "Không thể cập nhật mật khẩu");
-            request.setAttribute("customerId", customerId);
-            request.getRequestDispatcher("/reset-password.jsp").forward(request, response);
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi hệ thống. Vui lòng thử lại sau.");
+            request.getRequestDispatcher("forgot-password.jsp").forward(request, response);
         }
     }
 }

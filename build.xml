@@ -68,4 +68,15 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <!-- Custom target: Copy config.properties after compilation -->
+    <target name="-post-compile">
+        <echo message="Copying config.properties to build directory..."/>
+        <copy file="${basedir}/src/conf/config.properties" 
+              todir="${build.classes.dir}" 
+              overwrite="true"
+              failonerror="false"/>
+        <echo message="config.properties copied successfully!"/>
+    </target>
+    
 </project>

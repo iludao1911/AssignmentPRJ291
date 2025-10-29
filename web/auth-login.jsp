@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Pharmacy Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -46,6 +47,36 @@
             align-items: center;
             text-align: center;
             position: relative;
+        }
+
+        .btn-back-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-back-home:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+            transform: translateX(-3px);
+        }
+
+        .btn-back-home i {
+            font-size: 1.1rem;
         }
 
         .left-panel::before {
@@ -356,6 +387,10 @@
 <body>
     <div class="container">
         <div class="left-panel">
+            <a href="home.jsp" class="btn-back-home">
+                <i class="fas fa-arrow-left"></i>
+                <span>Về Trang Chủ</span>
+            </a>
             <div class="features">
                 <div class="feature">
                 </div>
@@ -424,7 +459,7 @@
                         <input type="checkbox" name="remember">
                         Ghi nhớ đăng nhập
                     </label>
-                    <a href="#" class="forgot-password">Quên mật khẩu?</a>
+                    <a href="forgot-password.jsp" class="forgot-password">Quên mật khẩu?</a>
                 </div>
 
                 <button type="submit" class="btn-primary">Đăng nhập</button>
@@ -434,10 +469,20 @@
                 <span>Hoặc đăng nhập với Google</span>
             </div>
 
-            <button class="btn-google" onclick="alert('Tính năng đăng nhập Google chưa được triển khai')">
-                <i class="fab fa-google"></i>
-                Đăng nhập với Google
-            </button>
+            <div id="g_id_onload"
+                 data-client_id="1019363317955-5e9ho3m5a66kdghhr7u5g55okd0dne2k.apps.googleusercontent.com"
+                 data-callback="handleGoogleLogin"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" 
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left"
+                 data-width="100%">
+            </div>
 
             <div class="signup-link">
                 Chưa có tài khoản? <a href="auth-register.jsp">Đăng ký ngay</a>
@@ -459,6 +504,39 @@
                 toggleIcon.classList.remove('fa-eye-slash');
                 toggleIcon.classList.add('fa-eye');
             }
+        }
+        
+        // Google Login Callback
+        function handleGoogleLogin(response) {
+            // Decode JWT token
+            const credential = response.credential;
+            const payload = JSON.parse(atob(credential.split('.')[1]));
+            
+            // Gửi thông tin user đến server
+            fetch('google-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture,
+                    sub: payload.sub
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirectUrl || 'home.jsp';
+                } else {
+                    alert('Lỗi đăng nhập: ' + (data.message || 'Không xác định'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Lỗi kết nối server');
+            });
         }
     </script>
 </body>

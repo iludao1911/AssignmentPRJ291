@@ -30,6 +30,7 @@
             border-radius: 20px;
             padding: 50px 40px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
 
         .logo {

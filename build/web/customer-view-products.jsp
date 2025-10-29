@@ -7,34 +7,33 @@
     <title>Danh mục Thuốc Công Khai</title>
     <style>
         body { font-family: Arial, sans-serif; }
+        /* Style cho bảng */
         table { 
             border-collapse: collapse; 
-            width: 70%;
+            width: 70%; /* Giảm chiều rộng để trông gọn hơn */
             margin-top: 20px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        /* Style cho tiêu đề cột */
         th { 
-            background-color: #3f51b5;
+            background-color: #3f51b5; /* Màu xanh đậm */
             color: white; 
             padding: 12px 15px; 
             text-align: left;
         }
+        /* Style cho các ô dữ liệu */
         td { 
             border: 1px solid #ddd; 
             padding: 10px 15px;
         }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .price, .date { text-align: right; }
-        h1, p { margin-left: 15%; }
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
+        /* Thêm màu xen kẽ */
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
         }
-        .btn:hover { background-color: #45a049; }
+        .price, .date {
+            text-align: right; /* Căn phải cho giá và ngày tháng */
+        }
+        h1, p { margin-left: 15%; } /* Căn chỉnh tiêu đề khớp với bảng */
     </style>
 </head>
 <body>
@@ -43,7 +42,7 @@
     </c:if>
 
     <h1>Danh mục Thuốc</h1>
-    <p>Chào mừng Khách hàng <c:out value="${sessionScope.currentCustomer.name}" />!</p>
+    <p>Chào mừng Khách hàng <c:out value="${sessionScope.currentCustomer.name}" />! Vui lòng liên hệ nhân viên để đặt hàng.</p>
     
     <c:if test="${not empty error}">
         <p class="error">Lỗi: <c:out value="${error}" /></p>
@@ -55,7 +54,6 @@
                 <th>Tên Thuốc</th>
                 <th class="price">Giá (VND)</th>
                 <th class="date">Hạn Dùng</th>
-                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -64,26 +62,17 @@
                     <td><c:out value="${medicine.name}" /></td>
                     <td class="price"><c:out value="${medicine.price}" /></td>
                     <td class="date"><c:out value="${medicine.expiryDate}" /></td>
-                    <td>
-                        <form action="cart" method="post" style="display:inline;">
-                            <input type="hidden" name="action" value="add">
-                            <input type="hidden" name="medicineId" value="${medicine.medicineId}">
-                            <input type="number" name="quantity" value="1" min="1" style="width:50px;">
-                            <button type="submit" class="btn">Thêm vào giỏ</button>
-                        </form>
-                    </td>
                 </tr>
             </c:forEach>
             <c:if test="${empty requestScope.listMedicines}">
-                 <tr><td colspan="4">Hiện tại chưa có sản phẩm nào.</td></tr>
+                 <tr><td colspan="3">Hiện tại chưa có sản phẩm nào.</td></tr>
             </c:if>
         </tbody>
     </table>
-
+    
     <p style="margin-top: 20px; margin-left: 15%;">
         <a href="index.jsp">Về trang chủ</a> | 
-        <a href="customerLogin?action=logout">Đăng xuất</a> | 
-        <a href="cart?action=view">🛒 Xem giỏ hàng</a>
+        <a href="customerLogin?action=logout">Đăng xuất</a>
     </p>
 </body>
 </html>

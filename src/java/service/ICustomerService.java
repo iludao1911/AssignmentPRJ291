@@ -11,6 +11,9 @@ public interface ICustomerService {
     boolean updateCustomer(Customer customer) throws SQLException, IllegalArgumentException;
     boolean deleteCustomer(int id) throws SQLException;
     
-    // SỬ DỤNG NAME ĐỂ XÁC THỰC
-    Customer validateCustomer(String name, String password) throws SQLException; 
+    // PHƯƠNG THỨC XÁC THỰC VÀ PHÂN QUYỀN
+    Customer validateCustomer(String email, String password) throws SQLException;
+    Customer getAdminAccount() throws SQLException;
+    boolean isEmailExists(String email) throws SQLException;
+    Customer findByEmail(String email) throws SQLException;
 }

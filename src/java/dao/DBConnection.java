@@ -13,7 +13,6 @@ public class DBConnection {
     private static final String USER_DB = "sa";
     private static final String PASS_DB = "123456";
 
-
     public static Connection getConnection() {
         Connection con = null;
         try {

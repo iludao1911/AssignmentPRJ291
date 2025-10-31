@@ -59,7 +59,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -127,7 +127,7 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #667eea;
+            color: #0891b2;
         }
 
         /* Cart Icon */
@@ -236,7 +236,7 @@
         }
 
         .dropdown-menu a i {
-            color: #667eea;
+            color: #0891b2;
             width: 20px;
         }
 
@@ -257,7 +257,7 @@
         }
 
         .page-title i {
-            color: #667eea;
+            color: #0891b2;
         }
 
         /* Cart Layout */
@@ -296,7 +296,7 @@
             display: inline-block;
             margin-top: 20px;
             padding: 10px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -344,7 +344,7 @@
 
         .item-image i {
             font-size: 2.5rem;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .item-details {
@@ -360,7 +360,7 @@
 
         .item-price {
             font-size: 1.2rem;
-            color: #667eea;
+            color: #0891b2;
             font-weight: 700;
             margin-bottom: 15px;
         }
@@ -388,9 +388,9 @@
         }
 
         .quantity-control button:hover {
-            background: #667eea;
+            background: #0891b2;
             color: white;
-            border-color: #667eea;
+            border-color: #0891b2;
         }
 
         .quantity-control input {
@@ -445,7 +445,7 @@
             border-bottom: none;
             padding-top: 20px;
             margin-top: 10px;
-            border-top: 2px solid #667eea;
+            border-top: 2px solid #0891b2;
         }
 
         .summary-label {
@@ -459,14 +459,14 @@
 
         .summary-total {
             font-size: 1.5rem;
-            color: #667eea;
+            color: #0891b2;
             font-weight: 700;
         }
 
         .checkout-btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -479,15 +479,15 @@
 
         .checkout-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(8, 145, 178, 0.4);
         }
 
         .continue-shopping {
             width: 100%;
             padding: 12px;
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: #0891b2;
+            border: 2px solid #0891b2;
             border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
@@ -500,7 +500,7 @@
         }
 
         .continue-shopping:hover {
-            background: #667eea;
+            background: #0891b2;
             color: white;
         }
 
@@ -589,8 +589,13 @@
                     %>
                         <div class="cart-item" data-cart-id="<%= item.getCartId() %>" data-medicine-id="<%= item.getMedicineId() %>">
                             <div class="item-image">
-                                <% if (item.getMedicineImage() != null && !item.getMedicineImage().isEmpty()) { %>
-                                    <img src="image/<%= item.getMedicineImage() %>" alt="<%= item.getMedicineName() %>">
+                                <% if (item.getMedicineImage() != null && !item.getMedicineImage().isEmpty()) { 
+                                    String imgPath = item.getMedicineImage();
+                                    if (!imgPath.startsWith("image/")) {
+                                        imgPath = "image/" + imgPath;
+                                    }
+                                %>
+                                    <img src="<%= imgPath %>" alt="<%= item.getMedicineName() %>">
                                 <% } else { %>
                                     <i class="fas fa-pills"></i>
                                 <% } %>
@@ -605,12 +610,16 @@
                                         <button onclick="updateQuantity(<%= item.getMedicineId() %>, -1)">
                                             <i class="fas fa-minus"></i>
                                         </button>
-                                        <input type="number" value="<%= item.getQuantity() %>" min="1" readonly>
+                                        <input type="number"
+                                               value="<%= item.getQuantity() %>"
+                                               min="1"
+                                               max="999"
+                                               onchange="updateQuantityByInput(<%= item.getMedicineId() %>, this.value)">
                                         <button onclick="updateQuantity(<%= item.getMedicineId() %>, 1)">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
-                                    
+
                                     <button class="remove-btn" onclick="removeItem(<%= item.getMedicineId() %>)">
                                         <i class="fas fa-trash"></i> Xóa
                                     </button>
@@ -655,23 +664,65 @@
 
     <script>
         function updateQuantity(medicineId, change) {
-            const cartItem = document.querySelector(`[data-medicine-id="${medicineId}"]`);
+            const cartItem = document.querySelector('[data-medicine-id="' + medicineId + '"]');
             const input = cartItem.querySelector('input[type="number"]');
             let newQuantity = parseInt(input.value) + change;
-            
+
             if (newQuantity < 1) {
                 if (confirm('Bạn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
                     removeItem(medicineId);
                 }
                 return;
             }
-            
+
             // Call API to update
             const params = new URLSearchParams();
             params.append('medicineId', medicineId);
             params.append('quantity', newQuantity);
             params.append('action', 'update');
-            
+
+            fetch('cart-update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra');
+            });
+        }
+
+        function updateQuantityByInput(medicineId, value) {
+            let newQuantity = parseInt(value);
+
+            if (isNaN(newQuantity) || newQuantity < 1) {
+                alert('Số lượng phải là số dương');
+                location.reload();
+                return;
+            }
+
+            if (newQuantity > 999) {
+                alert('Số lượng tối đa là 999');
+                location.reload();
+                return;
+            }
+
+            // Call API to update
+            const params = new URLSearchParams();
+            params.append('medicineId', medicineId);
+            params.append('quantity', newQuantity);
+            params.append('action', 'update');
+
             fetch('cart-update', {
                 method: 'POST',
                 headers: {
@@ -727,5 +778,8 @@
             window.location.href = 'checkout';
         }
     </script>
+
+    <!-- AI Chatbot Widget -->
+    <jsp:include page="chatbot-widget.jsp" />
 </body>
 </html>

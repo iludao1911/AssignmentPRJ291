@@ -4,7 +4,7 @@
     request.setAttribute("pageTitle", "Quản lý Nhà cung cấp");
     request.setAttribute("page", "suppliers");
 %>
-<jsp:include page="includes/admin-header.jsp" />
+<jsp:include page="../includes/admin-header.jsp" />
 
 <div class="page-header">
     <h1 class="page-title">Quản lý Nhà cung cấp</h1>
@@ -19,7 +19,7 @@
         </div>
         <div style="display: flex; gap: 10px;">
             <input type="text" id="searchInput" placeholder="Tìm kiếm nhà cung cấp..." style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; width: 300px;">
-            <a href="suppliers?action=new" style="padding: 10px 20px; background: linear-gradient(135deg, #0891b2, #0d9488); color: white; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600;">
+            <a href="${pageContext.request.contextPath}/admin/suppliers?action=new" style="padding: 10px 20px; background: linear-gradient(135deg, #0891b2, #0d9488); color: white; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600;">
                 <i class="fas fa-plus"></i> Thêm NCC Mới
             </a>
         </div>
@@ -67,10 +67,10 @@
                                 <c:out value="${supplier.email}" />
                             </td>
                             <td style="padding: 15px; text-align: center;">
-                                <a href="suppliers?action=edit&id=<c:out value='${supplier.supplierId}' />" style="padding: 6px 12px; background: #0891b2; color: white; border: none; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-right: 5px;">
+                                <a href="${pageContext.request.contextPath}/admin/suppliers?action=edit&id=<c:out value='${supplier.supplierId}' />" style="padding: 6px 12px; background: #0891b2; color: white; border: none; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-right: 5px;">
                                     <i class="fas fa-edit"></i> Sửa
                                 </a>
-                                <a href="suppliers?action=delete&id=<c:out value='${supplier.supplierId}' />" onclick="return confirm('Xóa nhà cung cấp này?');" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                                <a href="${pageContext.request.contextPath}/admin/suppliers?action=delete&id=<c:out value='${supplier.supplierId}' />" onclick="return confirm('Xóa nhà cung cấp này?');" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
                                     <i class="fas fa-trash"></i> Xóa
                                 </a>
                             </td>
@@ -95,4 +95,4 @@
     });
 </script>
 
-<jsp:include page="includes/admin-footer.jsp" />
+<jsp:include page="../includes/admin-footer.jsp" />

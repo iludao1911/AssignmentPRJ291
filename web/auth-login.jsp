@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -86,7 +86,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.4) 100%);
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.3) 0%, rgba(13, 148, 136, 0.4) 100%);
         }
 
         .left-panel > * {
@@ -141,7 +141,7 @@
         .logo-icon {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -210,8 +210,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: #0891b2;
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
         }
 
         .password-toggle {
@@ -244,7 +244,7 @@
         }
 
         .forgot-password {
-            color: #667eea;
+            color: #0891b2;
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
@@ -257,7 +257,7 @@
         .btn-primary {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -269,7 +269,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(8, 145, 178, 0.3);
         }
 
         .btn-primary:active {
@@ -333,7 +333,7 @@
         }
 
         .signup-link a {
-            color: #667eea;
+            color: #0891b2;
             text-decoration: none;
             font-weight: 600;
         }

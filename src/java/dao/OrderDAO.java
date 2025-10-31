@@ -36,6 +36,12 @@ public class OrderDAO {
         "WHERE o.User_id = ? " +
         "ORDER BY o.order_date DESC";
     
+    private static final String SELECT_ALL_ORDERS = 
+        "SELECT o.*, u.name as user_name, u.email as user_email " +
+        "FROM [Order] o " +
+        "INNER JOIN [User] u ON o.User_id = u.User_id " +
+        "ORDER BY o.order_date DESC";
+    
     /**
      * Tạo Order mới kèm OrderDetail từ Cart
      * Transaction: Tạo Order -> Tạo OrderDetail -> Return Order_id
@@ -233,6 +239,60 @@ public class OrderDAO {
     }
     
     /**
+     * Lấy danh sách OrderDetail theo Order_id
+     */
+    public List<model.OrderDetail> getOrderDetails(int orderId) throws SQLException {
+        List<model.OrderDetail> details = new ArrayList<>();
+        
+        String sql = "SELECT od.*, m.name as medicine_name, m.image as medicine_image " +
+                     "FROM OrderDetail od " +
+                     "INNER JOIN Medicine m ON od.Medicine_id = m.Medicine_id " +
+                     "WHERE od.Order_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, orderId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    model.OrderDetail detail = new model.OrderDetail();
+                    detail.setOrderDetailId(rs.getInt("OrderDetail_id"));
+                    detail.setOrderId(rs.getInt("Order_id"));
+                    detail.setMedicineId(rs.getInt("Medicine_id"));
+                    detail.setQuantity(rs.getInt("quantity"));
+                    detail.setPrice(rs.getBigDecimal("unit_price"));
+                    detail.setSubtotal(rs.getBigDecimal("subtotal"));
+                    detail.setMedicineName(rs.getString("medicine_name"));
+                    detail.setMedicineImage(rs.getString("medicine_image"));
+                    
+                    details.add(detail);
+                }
+            }
+        }
+        
+        return details;
+    }
+    
+    /**
+     * Get all orders (Admin)
+     */
+    public List<Order> getAllOrders() throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_ALL_ORDERS);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                orders.add(extractOrderFromResultSet(rs));
+            }
+        }
+        
+        return orders;
+    }
+    
+    /**
      * Extract Order object from ResultSet
      */
     private Order extractOrderFromResultSet(ResultSet rs) throws SQLException {
@@ -247,5 +307,31 @@ public class OrderDAO {
         order.setUserEmail(rs.getString("user_email"));
         
         return order;
+    }
+    
+    /**
+     * Xóa Order và các OrderDetail liên quan
+     */
+    public void deleteOrder(int orderId) throws SQLException {
+        String deleteDetails = "DELETE FROM OrderDetail WHERE Order_id = ?";
+        String deleteOrder = "DELETE FROM [Order] WHERE Order_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            
+            try (PreparedStatement ps1 = conn.prepareStatement(deleteDetails)) {
+                ps1.setInt(1, orderId);
+                ps1.executeUpdate();
+            }
+            
+            try (PreparedStatement ps2 = conn.prepareStatement(deleteOrder)) {
+                ps2.setInt(1, orderId);
+                ps2.executeUpdate();
+            }
+            
+            conn.commit();
+        } catch (SQLException e) {
+            throw e;
+        }
     }
 }

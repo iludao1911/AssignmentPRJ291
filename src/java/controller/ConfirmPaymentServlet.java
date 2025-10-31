@@ -67,18 +67,18 @@ public class ConfirmPaymentServlet extends HttpServlet {
                 return;
             }
             
-            // Cập nhật Order: status = Shipping (đang vận chuyển), shipping address
-            boolean updated = orderDAO.updateOrderStatus(pendingOrderId, "Shipping", shippingAddress);
-            
+            // Cập nhật Order: status = Đã thanh toán (chờ admin xác nhận vận chuyển), shipping address
+            boolean updated = orderDAO.updateOrderStatus(pendingOrderId, "Đã thanh toán", shippingAddress);
+
             if (updated) {
                 // Xóa giỏ hàng sau khi thanh toán thành công
                 cartDAO.clearCart(currentUser.getUserId());
-                
+
                 // Xóa pendingOrderId khỏi session
                 session.removeAttribute("pendingOrderId");
-                
+
                 result.put("success", true);
-                result.put("message", "Thanh toán thành công!");
+                result.put("message", "Thanh toán thành công! Đơn hàng đang chờ xác nhận.");
                 result.put("orderId", pendingOrderId);
             } else {
                 result.put("success", false);

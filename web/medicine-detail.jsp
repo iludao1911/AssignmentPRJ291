@@ -52,7 +52,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -102,7 +102,7 @@
             right: 5px;
             top: 50%;
             transform: translateY(-50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             border: none;
             color: white;
             padding: 8px 20px;
@@ -141,7 +141,7 @@
             height: 40px;
             border-radius: 50%;
             background: white;
-            color: #667eea;
+            color: #0891b2;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -224,7 +224,7 @@
         .dropdown-menu a i {
             width: 20px;
             text-align: center;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .dropdown-menu a.logout-link {
@@ -266,7 +266,7 @@
             align-items: center;
             gap: 8px;
             background: white;
-            color: #667eea;
+            color: #0891b2;
             padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
@@ -334,7 +334,7 @@
         }
 
         .product-category {
-            color: #667eea;
+            color: #0891b2;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.9rem;
@@ -373,7 +373,7 @@
         .current-price {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .original-price {
@@ -398,7 +398,7 @@
         }
 
         .meta-item i {
-            color: #667eea;
+            color: #0891b2;
             font-size: 1.2rem;
         }
 
@@ -434,24 +434,25 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(8, 145, 178, 0.4);
         }
 
         .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
         }
 
         .btn-secondary:hover {
-            background: #667eea;
-            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.5);
         }
 
         .description-section {
@@ -470,7 +471,7 @@
         }
 
         .section-title i {
-            color: #667eea;
+            color: #0891b2;
         }
 
         .description-content {
@@ -534,7 +535,7 @@
 
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0891b2;
         }
 
         .review-item {
@@ -555,7 +556,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             display: flex;
             align-items: center;
@@ -698,8 +699,13 @@
                         <div class="discount-badge">-<%= discount %>%</div>
                     <% } %>
                     <div class="product-image">
-                        <% if (medicine.getImagePath() != null && !medicine.getImagePath().isEmpty()) { %>
-                            <img src="image/<%= medicine.getImagePath() %>" alt="<%= medicine.getName() %>" 
+                        <% if (medicine.getImagePath() != null && !medicine.getImagePath().isEmpty()) { 
+                            String imgPath = medicine.getImagePath();
+                            if (!imgPath.startsWith("image/")) {
+                                imgPath = "image/" + imgPath;
+                            }
+                        %>
+                            <img src="<%= imgPath %>" alt="<%= medicine.getName() %>" 
                                  onerror="this.parentElement.innerHTML='<i class=\'fas fa-pills\' style=\'font-size:5rem;color:#ddd;\'></i>'">
                         <% } else { %>
                             <i class="fas fa-pills" style="font-size: 5rem; color: #ddd;"></i>
@@ -752,6 +758,21 @@
                                     <%= medicine.getExpiryDate() != null ? dateFormat.format(medicine.getExpiryDate()) : "N/A" %>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="quantity-selector" style="margin: 20px 0;">
+                        <label style="font-weight: 600; color: #333; margin-bottom: 10px; display: block;">Số lượng:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button onclick="changeQuantity(-1)" style="width: 40px; height: 40px; border: 2px solid #0891b2; background: white; color: #0891b2; border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: all 0.3s;">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="quantityInput" value="1" min="1" max="<%= medicine.getQuantity() %>"
+                                   style="width: 80px; text-align: center; border: 2px solid #e0e0e0; border-radius: 8px; padding: 10px; font-size: 1.1rem; font-weight: 600;">
+                            <button onclick="changeQuantity(1)" style="width: 40px; height: 40px; border: 2px solid #0891b2; background: white; color: #0891b2; border-radius: 8px; cursor: pointer; font-size: 1.2rem; transition: all 0.3s;">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <span style="color: #999; font-size: 0.9rem;">(Tối đa: <%= medicine.getQuantity() %>)</span>
                         </div>
                     </div>
 
@@ -818,7 +839,7 @@
                 <% } else { %>
                     <div class="review-form">
                         <p style="text-align: center; color: #999;">
-                            <a href="auth-login.jsp" style="color: #667eea; text-decoration: none; font-weight: 600;">Đăng nhập</a> 
+                            <a href="auth-login.jsp" style="color: #0891b2; text-decoration: none; font-weight: 600;">Đăng nhập</a> 
                             để viết đánh giá
                         </p>
                     </div>
@@ -865,16 +886,45 @@
     </div>
 
     <script>
+        // Quantity selector
+        const maxQuantity = <%= medicine.getQuantity() %>;
+
+        function changeQuantity(change) {
+            const input = document.getElementById('quantityInput');
+            let newValue = parseInt(input.value) + change;
+
+            if (newValue < 1) {
+                newValue = 1;
+            } else if (newValue > maxQuantity) {
+                newValue = maxQuantity;
+                alert('Số lượng tối đa là ' + maxQuantity);
+            }
+
+            input.value = newValue;
+        }
+
+        // Validate quantity input
+        document.getElementById('quantityInput').addEventListener('change', function() {
+            let value = parseInt(this.value);
+
+            if (isNaN(value) || value < 1) {
+                this.value = 1;
+            } else if (value > maxQuantity) {
+                this.value = maxQuantity;
+                alert('Số lượng tối đa là ' + maxQuantity);
+            }
+        });
+
         // Rating input functionality
         const ratingStars = document.querySelectorAll('.rating-input i');
         const ratingValue = document.getElementById('ratingValue');
-        
+
         if (ratingStars.length > 0 && ratingValue) {
             ratingStars.forEach(star => {
                 star.addEventListener('click', function() {
                     const rating = this.getAttribute('data-rating');
                     ratingValue.value = rating;
-                    
+
                     // Update stars display
                     ratingStars.forEach((s, index) => {
                         if (index < rating) {
@@ -950,12 +1000,19 @@
                 window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
-            
+
             const medicineId = <%= medicine.getMedicineId() %>;
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+
+            if (isNaN(quantity) || quantity < 1) {
+                alert('Vui lòng nhập số lượng hợp lệ');
+                return;
+            }
+
             const params = new URLSearchParams();
             params.append('medicineId', medicineId);
-            params.append('quantity', 1);
-            
+            params.append('quantity', quantity);
+
             fetch('add-to-cart', {
                 method: 'POST',
                 headers: {
@@ -988,13 +1045,20 @@
                 window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
-            
+
             // Thêm vào giỏ hàng trước
             const medicineId = <%= medicine.getMedicineId() %>;
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+
+            if (isNaN(quantity) || quantity < 1) {
+                alert('Vui lòng nhập số lượng hợp lệ');
+                return;
+            }
+
             const params = new URLSearchParams();
             params.append('medicineId', medicineId);
-            params.append('quantity', 1);
-            
+            params.append('quantity', quantity);
+
             fetch('add-to-cart', {
                 method: 'POST',
                 headers: {
@@ -1017,5 +1081,8 @@
             });
         }
     </script>
+
+    <!-- AI Chatbot Widget -->
+    <jsp:include page="chatbot-widget.jsp" />
 </body>
 </html>

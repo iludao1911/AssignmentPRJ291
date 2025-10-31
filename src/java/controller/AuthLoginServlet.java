@@ -79,17 +79,16 @@ public class AuthLoginServlet extends HttpServlet {
                 session.setAttribute("currentUser", user);
                 session.setAttribute("userId", user.getUserId());
                 session.setAttribute("userRole", user.getRole());
-                
+
                 // Set session timeout
                 if ("on".equals(remember)) {
                     session.setMaxInactiveInterval(30 * 24 * 60 * 60); // 30 days
-                } else {
-                    session.setMaxInactiveInterval(30 * 60); // 30 minutes
                 }
+                // Nếu không chọn remember, sử dụng timeout mặc định từ web.xml (2 giờ)
                 
                 // Redirect dựa vào role
                 if (user.isAdmin()) {
-                    response.sendRedirect("admin-dashboard.jsp");
+                    response.sendRedirect("admin/dashboard");
                 } else {
                     response.sendRedirect("home.jsp");
                 }

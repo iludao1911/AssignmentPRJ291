@@ -7,7 +7,7 @@
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     if (currentUser == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("auth-login.jsp");
         return;
     }
     
@@ -44,7 +44,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -105,7 +105,7 @@
         }
 
         .page-title i {
-            color: #667eea;
+            color: #0891b2;
         }
 
         /* Profile Layout */
@@ -128,7 +128,7 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -172,7 +172,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .user-info-text {
@@ -188,6 +188,31 @@
         .user-info-value {
             font-weight: 600;
             color: #333;
+        }
+
+        /* Edit Profile Button */
+        .edit-profile-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .edit-profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(8, 145, 178, 0.3);
         }
 
         /* Orders Section */
@@ -212,14 +237,14 @@
         }
 
         .view-all-link {
-            color: #667eea;
+            color: #0891b2;
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s;
         }
 
         .view-all-link:hover {
-            color: #764ba2;
+            color: #0d9488;
         }
 
         .empty-orders {
@@ -248,8 +273,8 @@
         }
 
         .order-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+            border-color: #0891b2;
+            box-shadow: 0 5px 15px rgba(8, 145, 178, 0.1);
         }
 
         .order-header {
@@ -291,13 +316,79 @@
         .order-total {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #667eea;
+            color: #0891b2;
         }
 
         @media (max-width: 968px) {
             .profile-layout {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Edit Mode Styles */
+        .edit-mode .user-info-value {
+            display: none;
+        }
+
+        .edit-mode .edit-input {
+            display: block !important;
+        }
+
+        .edit-input {
+            display: none;
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #0891b2;
+        }
+
+        .edit-actions {
+            display: none;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .edit-mode .edit-actions {
+            display: flex;
+        }
+
+        .edit-mode .edit-profile-btn {
+            display: none;
+        }
+
+        .btn-save, .btn-cancel {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save {
+            background: #0891b2;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #0d9488;
+        }
+
+        .btn-cancel {
+            background: #e5e7eb;
+            color: #666;
+        }
+
+        .btn-cancel:hover {
+            background: #d1d5db;
         }
     </style>
 </head>
@@ -325,7 +416,7 @@
 
         <div class="profile-layout">
             <!-- User Info Card -->
-            <div class="user-card">
+            <div class="user-card" id="userCard">
                 <div class="user-avatar-large">
                     <%= currentUser.getName().substring(0, 1).toUpperCase() %>
                 </div>
@@ -333,35 +424,64 @@
                 <div class="user-name-large"><%= currentUser.getName() %></div>
                 <div class="user-email-large"><%= currentUser.getEmail() %></div>
                 
-                <div class="user-info-item">
-                    <div class="user-info-icon">
-                        <i class="fas fa-phone"></i>
+                <form id="editProfileForm" method="post" action="profile">
+                    <div class="user-info-item">
+                        <div class="user-info-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-info-text">
+                            <div class="user-info-label">Họ và tên</div>
+                            <div class="user-info-value"><%= currentUser.getName() %></div>
+                            <input type="text" name="name" class="edit-input" value="<%= currentUser.getName() %>">
+                        </div>
                     </div>
-                    <div class="user-info-text">
-                        <div class="user-info-label">Số điện thoại</div>
-                        <div class="user-info-value"><%= currentUser.getPhone() != null ? currentUser.getPhone() : "Chưa cập nhật" %></div>
+                    
+                    <div class="user-info-item">
+                        <div class="user-info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="user-info-text">
+                            <div class="user-info-label">Số điện thoại</div>
+                            <div class="user-info-value"><%= currentUser.getPhone() != null ? currentUser.getPhone() : "Chưa cập nhật" %></div>
+                            <input type="text" name="phone" class="edit-input" value="<%= currentUser.getPhone() != null ? currentUser.getPhone() : "" %>">
+                        </div>
                     </div>
-                </div>
+                    
+                    <div class="user-info-item">
+                        <div class="user-info-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="user-info-text">
+                            <div class="user-info-label">Vai trò</div>
+                            <div class="user-info-value"><%= currentUser.getRole() %></div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-info-item">
+                        <div class="user-info-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="user-info-text">
+                            <div class="user-info-label">Trạng thái</div>
+                            <div class="user-info-value"><%= currentUser.isVerified() ? "Đã xác thực" : "Chưa xác thực" %></div>
+                        </div>
+                    </div>
+                    
+                    <div class="edit-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-check"></i> Lưu
+                        </button>
+                        <button type="button" class="btn-cancel" onclick="toggleEditMode()">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                    </div>
+                </form>
                 
-                <div class="user-info-item">
-                    <div class="user-info-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="user-info-text">
-                        <div class="user-info-label">Vai trò</div>
-                        <div class="user-info-value"><%= currentUser.getRole() %></div>
-                    </div>
-                </div>
-                
-                <div class="user-info-item">
-                    <div class="user-info-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="user-info-text">
-                        <div class="user-info-label">Trạng thái</div>
-                        <div class="user-info-value"><%= currentUser.isVerified() ? "Đã xác thực" : "Chưa xác thực" %></div>
-                    </div>
-                </div>
+                <!-- Edit Profile Button -->
+                <button class="edit-profile-btn" onclick="toggleEditMode()">
+                    <i class="fas fa-edit"></i>
+                    Chỉnh sửa hồ sơ
+                </button>
             </div>
 
             <!-- Orders Section -->
@@ -410,5 +530,22 @@
             </div>
         </div>
     </div>
+
+    <!-- AI Chatbot Widget -->
+    <jsp:include page="chatbot-widget.jsp" />
+    
+    <% if (request.getAttribute("success") != null) { %>
+        <script>alert('<%= request.getAttribute("success") %>');</script>
+    <% } %>
+    <% if (request.getAttribute("error") != null) { %>
+        <script>alert('<%= request.getAttribute("error") %>');</script>
+    <% } %>
+    
+    <script>
+        function toggleEditMode() {
+            const userCard = document.getElementById('userCard');
+            userCard.classList.toggle('edit-mode');
+        }
+    </script>
 </body>
 </html>

@@ -30,7 +30,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -78,7 +78,7 @@
             right: 5px;
             top: 50%;
             transform: translateY(-50%);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             border: none;
             color: white;
             padding: 8px 20px;
@@ -137,7 +137,7 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .search-result-info {
@@ -159,7 +159,7 @@
             display: block;
             text-align: center;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             font-weight: 600;
             border-radius: 0 0 12px 12px;
@@ -169,7 +169,7 @@
         }
 
         .search-view-more:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
             color: white;
         }
 
@@ -230,7 +230,7 @@
             height: 40px;
             border-radius: 50%;
             background: white;
-            color: #667eea;
+            color: #0891b2;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -313,7 +313,7 @@
         .dropdown-menu a i {
             width: 20px;
             text-align: center;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .dropdown-menu a.logout-link {
@@ -391,7 +391,7 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1.5rem;
-            color: #667eea;
+            color: #0891b2;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -468,19 +468,19 @@
         }
 
         .category-tabs::-webkit-scrollbar-thumb {
-            background: #667eea;
+            background: #0891b2;
             border-radius: 10px;
         }
 
         .category-tabs::-webkit-scrollbar-thumb:hover {
-            background: #764ba2;
+            background: #0d9488;
         }
 
         .category-tabs button {
             padding: 12px 30px;
-            border: 2px solid #667eea;
+            border: 2px solid #0891b2;
             background: white;
-            color: #667eea;
+            color: #0891b2;
             border-radius: 25px;
             cursor: pointer;
             font-size: 0.95rem;
@@ -494,11 +494,11 @@
 
         .category-tabs button:hover,
         .category-tabs button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border-color: transparent;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(8, 145, 178, 0.3);
         }
 
         /* Section Header */
@@ -540,13 +540,13 @@
 
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 5px 20px rgba(8, 145, 178, 0.2);
         }
 
         .product-image {
             width: 100%;
             height: 220px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.05) 0%, rgba(13, 148, 136, 0.05) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -562,7 +562,7 @@
 
         .product-image i {
             font-size: 4rem;
-            color: #667eea;
+            color: #0891b2;
             opacity: 0.3;
         }
 
@@ -588,7 +588,7 @@
         }
 
         .product-category {
-            color: #667eea;
+            color: #0891b2;
             font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -649,7 +649,7 @@
         .current-price {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #667eea;
+            color: #0891b2;
             line-height: 1.2;
         }
 
@@ -673,7 +673,7 @@
             width: 100%;
             margin-top: 15px;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -685,12 +685,12 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 2px 8px rgba(8, 145, 178, 0.2);
         }
 
         .add-to-cart-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(8, 145, 178, 0.4);
         }
 
         .add-to-cart-btn:active {
@@ -712,7 +712,7 @@
         }
 
         .buy-now-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -723,12 +723,12 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.2);
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
         }
 
         .buy-now-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.5);
         }
 
         .buy-now-btn:active {
@@ -756,13 +756,13 @@
         }
 
         .pagination button:hover:not(:disabled) {
-            background: #667eea;
+            background: #0891b2;
             color: white;
-            border-color: #667eea;
+            border-color: #0891b2;
         }
 
         .pagination button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border-color: transparent;
         }
@@ -995,8 +995,13 @@
             %>
             <div class="product-card" data-product-id="<%= medicine.getMedicineId() %>" onclick="window.location.href='medicine-detail?id=<%= medicine.getMedicineId() %>'" style="cursor: pointer;">
                 <div class="product-image">
-                    <% if (medicine.getImagePath() != null && !medicine.getImagePath().isEmpty()) { %>
-                        <img src="image/<%= medicine.getImagePath() %>" alt="<%= medicine.getName() %>" onerror="this.parentElement.innerHTML='<i class=\'fas fa-pills\'></i>'">
+                    <% if (medicine.getImagePath() != null && !medicine.getImagePath().isEmpty()) { 
+                        String imgPath = medicine.getImagePath();
+                        if (!imgPath.startsWith("image/")) {
+                            imgPath = "image/" + imgPath;
+                        }
+                    %>
+                        <img src="<%= imgPath %>" alt="<%= medicine.getName() %>" onerror="this.parentElement.innerHTML='<i class=\'fas fa-pills\'></i>'">
                     <% } else { %>
                         <i class="fas fa-pills"></i>
                     <% } %>
@@ -1339,7 +1344,7 @@
                 );
                 if (targetCard) {
                     targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    targetCard.style.outline = '3px solid #667eea';
+                    targetCard.style.outline = '3px solid #0891b2';
                     setTimeout(() => {
                         targetCard.style.outline = 'none';
                     }, 2000);
@@ -1409,7 +1414,7 @@
         function addToCartFromHome(medicineId) {
             <% if (currentUser == null) { %>
                 alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
-                window.location.href = 'login.jsp';
+                window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
 
@@ -1447,7 +1452,7 @@
         function buyNowFromHome(medicineId) {
             <% if (currentUser == null) { %>
                 alert('Vui lòng đăng nhập để mua hàng');
-                window.location.href = 'login.jsp';
+                window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
 
@@ -1476,5 +1481,8 @@
             });
         }
     </script>
+
+    <!-- AI Chatbot Widget -->
+    <jsp:include page="chatbot-widget.jsp" />
 </body>
 </html>

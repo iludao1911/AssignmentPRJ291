@@ -1,6 +1,7 @@
 package controller;
 
 import dao.MedicineDAO;
+import dao.SupplierDAO;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import model.Medicine;
+import model.Supplier;
 import service.IMedicineService;
 import service.MedicineServiceImpl;
 
@@ -24,19 +26,21 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/medicines")
+@WebServlet("/admin/medicines")
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
         maxFileSize = 1024 * 1024 * 10,      // 10MB
         maxRequestSize = 1024 * 1024 * 50)   // 50MB
 public class MedicineServlet extends HttpServlet {
 
     private IMedicineService medicineService;
+    private SupplierDAO supplierDAO;
     private static final String UPLOAD_DIR = "image";
     private ServletContext context;
 
     @Override
     public void init() throws ServletException {
         this.medicineService = new MedicineServiceImpl(new MedicineDAO());
+        this.supplierDAO = new SupplierDAO();
         this.context = getServletContext();
     }
 
@@ -114,7 +118,7 @@ public class MedicineServlet extends HttpServlet {
         request.setAttribute("searchName", name);
         request.setAttribute("categories", categories);
         request.setAttribute("sortOrder", sortOrder);
-        request.getRequestDispatcher("/medicine/ListMedicine.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/medicines.jsp").forward(request, response);
     }
 
     private void listMedicines(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
@@ -135,7 +139,7 @@ public class MedicineServlet extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("categories", categories);
         request.setAttribute("sortOrder", sortOrder);
-        request.getRequestDispatcher("/medicine/ListMedicine.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/medicines.jsp").forward(request, response);
     }
 
     private void listMedicinesByCategory(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
@@ -158,25 +162,36 @@ public class MedicineServlet extends HttpServlet {
         request.setAttribute("categories", categories);
         request.setAttribute("selectedCategory", category);
         request.setAttribute("sortOrder", sortOrder);
-        request.getRequestDispatcher("/medicine/ListMedicine.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/medicines.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/medicine/createMedicine.jsp").forward(request, response);
+        try {
+            List<Supplier> suppliers = supplierDAO.getAllSuppliers();
+            request.setAttribute("suppliers", suppliers);
+            request.setAttribute("action", "insert");
+            request.getRequestDispatcher("/product-form.jsp").forward(request, response);
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Medicine existingMedicine = medicineService.getMedicineById(id);
+        List<Supplier> suppliers = supplierDAO.getAllSuppliers();
         request.setAttribute("medicine", existingMedicine);
-        request.getRequestDispatcher("/medicine/editMedicine.jsp").forward(request, response);
+        request.setAttribute("suppliers", suppliers);
+        request.setAttribute("action", "update");
+        request.getRequestDispatcher("/product-form.jsp").forward(request, response);
     }
 
     private void showSaleForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Medicine existingMedicine = medicineService.getMedicineById(id);
         request.setAttribute("medicine", existingMedicine);
-        request.getRequestDispatcher("/medicine/saleMedicine.jsp").forward(request, response);
+        request.setAttribute("action", "updateSale");
+        request.getRequestDispatcher("/product-form.jsp").forward(request, response);
     }
 
     private void insertMedicine(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
@@ -190,20 +205,23 @@ public class MedicineServlet extends HttpServlet {
         Date expiryDate = Date.valueOf(request.getParameter("expiryDate"));
 
         // Xử lý upload ảnh
-        Part filePart = request.getPart("image_path");
-        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
         String imagePath = null;
-        if (fileName != null && !fileName.isEmpty()) {
-            imagePath = handleImageUpload(filePart, fileName);
+        Part filePart = request.getPart("imageFile");
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            if (fileName != null && !fileName.isEmpty()) {
+                imagePath = handleImageUpload(filePart, fileName);
+            }
         }
 
         Medicine newMedicine = new Medicine(0, supplierId, name, description, price, null, quantity, category, expiryDate, imagePath);
         try {
             medicineService.saveMedicine(newMedicine);
-            response.sendRedirect(request.getContextPath() + "/medicines");
+            response.sendRedirect(request.getContextPath() + "/admin/medicines");
         } catch (IllegalArgumentException e) {
-            request.setAttribute("errorMsg", e.getMessage());
-            request.getRequestDispatcher("/medicine/createMedicine.jsp").forward(request, response);
+            request.setAttribute("error", e.getMessage());
+            request.setAttribute("action", "insert");
+            request.getRequestDispatcher("/product-form.jsp").forward(request, response);
         }
     }
 
@@ -217,31 +235,29 @@ public class MedicineServlet extends HttpServlet {
         String category = request.getParameter("category");
         Date expiryDate = Date.valueOf(request.getParameter("expiryDate"));
 
-        // Lấy ảnh mới
-        Part filePart = request.getPart("image");
-        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-        String imagePath;
-
         // Lấy thông tin thuốc hiện tại để giữ lại salePrice và imagePath nếu không có ảnh mới
         Medicine existingMedicine = medicineService.getMedicineById(id);
         BigDecimal salePrice = existingMedicine.getSalePrice(); // Giữ lại sale price
+        String imagePath = existingMedicine.getImagePath(); // Mặc định giữ ảnh cũ
 
-        if (fileName != null && !fileName.isEmpty()) {
-            // Nếu có ảnh mới thì upload và cập nhật path
-            imagePath = handleImageUpload(filePart, fileName);
-        } else {
-            // Nếu không, giữ lại ảnh cũ
-            imagePath = existingMedicine.getImagePath();
+        // Xử lý upload ảnh mới
+        Part filePart = request.getPart("imageFile");
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            if (fileName != null && !fileName.isEmpty()) {
+                imagePath = handleImageUpload(filePart, fileName);
+            }
         }
 
         Medicine medicine = new Medicine(id, supplierId, name, description, price, salePrice, quantity, category, expiryDate, imagePath);
         try {
             medicineService.updateMedicine(medicine);
-            response.sendRedirect(request.getContextPath() + "/medicines");
+            response.sendRedirect(request.getContextPath() + "/admin/medicines");
         } catch (IllegalArgumentException e) {
-            request.setAttribute("errorMsg", e.getMessage());
+            request.setAttribute("error", e.getMessage());
             request.setAttribute("medicine", medicine);
-            request.getRequestDispatcher("/medicine/editMedicine.jsp").forward(request, response);
+            request.setAttribute("action", "update");
+            request.getRequestDispatcher("/product-form.jsp").forward(request, response);
         }
     }
 
@@ -259,37 +275,45 @@ public class MedicineServlet extends HttpServlet {
     private void deleteMedicine(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         medicineService.deleteMedicine(id);
-        response.sendRedirect(request.getContextPath() + "/medicines");
+        response.sendRedirect(request.getContextPath() + "/admin/medicines");
     }
 
     private String handleImageUpload(Part filePart, String fileName) throws IOException {
-        // Path for build/web/image
-        String buildPath = this.context.getRealPath("") + UPLOAD_DIR;
+        // Tạo tên file unique để tránh trùng
+        String fileExtension = "";
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0) {
+            fileExtension = fileName.substring(dotIndex);
+        }
+        String uniqueFileName = System.currentTimeMillis() + fileExtension;
+        
+        // Đường dẫn thư mục build (runtime)
+        String buildPath = this.context.getRealPath("/") + UPLOAD_DIR;
         File buildDir = new File(buildPath);
         if (!buildDir.exists()) {
             buildDir.mkdirs();
         }
-        String buildFilePath = buildPath + File.separator + fileName;
 
-        // Path for web/image (source)
-        String sourcePath = "c:\\Users\\Windows\\Documents\\NetBeansProjects\\asm1\\web\\image";
+        // Đường dẫn thư mục source (để giữ lại khi rebuild)
+        String projectPath = System.getProperty("user.dir");
+        String sourcePath = projectPath + File.separator + "web" + File.separator + UPLOAD_DIR;
         File sourceDir = new File(sourcePath);
         if (!sourceDir.exists()) {
             sourceDir.mkdirs();
         }
-        String sourceFilePath = sourcePath + File.separator + fileName;
 
-        // Use a temporary file to avoid reading the input stream twice
-        File tempFile = File.createTempFile("upload-", ".tmp");
-        tempFile.deleteOnExit();
+        // Lưu file vào cả 2 nơi
+        String buildFilePath = buildPath + File.separator + uniqueFileName;
+        String sourceFilePath = sourcePath + File.separator + uniqueFileName;
+
         try (InputStream input = filePart.getInputStream()) {
-            Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(input, Paths.get(buildFilePath), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // Copy from the temp file to the final destinations
-        Files.copy(tempFile.toPath(), Paths.get(buildFilePath), StandardCopyOption.REPLACE_EXISTING);
-        Files.copy(tempFile.toPath(), Paths.get(sourceFilePath), StandardCopyOption.REPLACE_EXISTING);
+        try (InputStream input = filePart.getInputStream()) {
+            Files.copy(input, Paths.get(sourceFilePath), StandardCopyOption.REPLACE_EXISTING);
+        }
 
-        return fileName;
+        return UPLOAD_DIR + "/" + uniqueFileName;
     }
 }

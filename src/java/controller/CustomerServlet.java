@@ -28,10 +28,10 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // KIỂM TRA PHÂN QUYỀN VÀ BẢO VỆ: Chỉ cho phép truy cập nếu là KHÁCH HÀNG đã đăng nhập
-        if (request.getSession().getAttribute("currentCustomer") == null) {
-            // Nếu session KHÔNG có Khách hàng, chuyển hướng đến trang đăng nhập Khách hàng.
-            response.sendRedirect("customerLogin"); 
+        // KIỂM TRA PHÂN QUYỀN VÀ BẢO VỆ: Chỉ cho phép truy cập nếu đã đăng nhập
+        if (request.getSession().getAttribute("currentUser") == null) {
+            // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+            response.sendRedirect(request.getContextPath() + "/auth-login.jsp"); 
             return; // Dừng xử lý
         }
         

@@ -43,7 +43,7 @@ public class AuthFilter implements Filter {
         } else {
             // Chưa đăng nhập, chuyển hướng về trang đăng nhập
             String contextPath = httpRequest.getContextPath();
-            httpResponse.sendRedirect(contextPath + "/customerLogin");
+            httpResponse.sendRedirect(contextPath + "/auth-login.jsp");
         }
     }
     

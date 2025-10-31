@@ -2,29 +2,69 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Cart" %>
 <%@ page import="model.User" %>
+<%@ page import="model.Order" %>
+<%@ page import="model.OrderDetail" %>
+<%@ page import="dao.OrderDAO" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.Locale" %>
 <%
     User currentUser = (User) session.getAttribute("currentUser");
     if (currentUser == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("auth-login.jsp");
         return;
     }
-    
+
+    // Kiểm tra xem có orderId trong session không (từ order history)
+    Integer pendingOrderId = (Integer) session.getAttribute("pendingOrderId");
+
     List<Cart> cartItems = (List<Cart>) request.getAttribute("cartItems");
     Double totalAmount = (Double) request.getAttribute("totalAmount");
     Integer orderId = (Integer) request.getAttribute("orderId");
-    
+
+    // Nếu có pendingOrderId, load thông tin từ order
+    if (pendingOrderId != null && cartItems == null) {
+        try {
+            OrderDAO orderDAO = new OrderDAO();
+            Order order = orderDAO.getOrderById(pendingOrderId);
+
+            if (order != null && "Pending".equals(order.getStatus()) && order.getUserId() == currentUser.getUserId()) {
+                // Load order details và convert sang Cart để hiển thị
+                List<OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
+                cartItems = new java.util.ArrayList<>();
+
+                for (OrderDetail detail : orderDetails) {
+                    Cart cart = new Cart();
+                    cart.setMedicineId(detail.getMedicineId());
+                    cart.setMedicineName(detail.getMedicineName());
+                    cart.setPrice(detail.getPrice());
+                    cart.setQuantity(detail.getQuantity());
+                    cart.setTotalPrice(detail.getTotalPrice());
+                    cartItems.add(cart);
+                }
+
+                totalAmount = order.getTotalAmount();
+                orderId = pendingOrderId;
+            } else {
+                response.sendRedirect("order-history.jsp");
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("order-history.jsp");
+            return;
+        }
+    }
+
     if (cartItems == null || totalAmount == null || orderId == null) {
         // Redirect về cart nếu truy cập trực tiếp
         response.sendRedirect("cart-view.jsp");
         return;
     }
-    
+
     if (totalAmount == 0) {
         totalAmount = 0.0;
     }
-    
+
     NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 %>
 <!DOCTYPE html>
@@ -49,7 +89,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -110,7 +150,7 @@
         }
 
         .page-title i {
-            color: #667eea;
+            color: #0891b2;
         }
 
         /* Checkout Layout */
@@ -143,7 +183,7 @@
         }
 
         .section-title i {
-            color: #667eea;
+            color: #0891b2;
         }
 
         .form-group {
@@ -172,7 +212,7 @@
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0891b2;
         }
 
         .form-group textarea {
@@ -198,7 +238,7 @@
         }
 
         .payment-option:hover {
-            border-color: #667eea;
+            border-color: #0891b2;
             background: #f8f9fa;
         }
 
@@ -209,13 +249,13 @@
         }
 
         .payment-option.selected {
-            border-color: #667eea;
+            border-color: #0891b2;
             background: #f0f4ff;
         }
 
         .payment-icon {
             font-size: 1.5rem;
-            color: #667eea;
+            color: #0891b2;
         }
 
         /* Order Summary */
@@ -273,7 +313,7 @@
 
         .item-image i {
             font-size: 1.5rem;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .item-info {
@@ -294,7 +334,7 @@
 
         .item-price {
             font-weight: 700;
-            color: #667eea;
+            color: #0891b2;
         }
 
         .summary-row {
@@ -308,7 +348,7 @@
             border-bottom: none;
             padding-top: 20px;
             margin-top: 10px;
-            border-top: 2px solid #667eea;
+            border-top: 2px solid #0891b2;
         }
 
         .summary-label {
@@ -322,14 +362,14 @@
 
         .summary-total {
             font-size: 1.5rem;
-            color: #667eea;
+            color: #0891b2;
             font-weight: 700;
         }
 
         .confirm-btn {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -346,7 +386,7 @@
 
         .confirm-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(8, 145, 178, 0.4);
         }
 
         .confirm-btn:disabled {
@@ -516,8 +556,13 @@
                     %>
                         <div class="order-item">
                             <div class="item-image">
-                                <% if (item.getMedicineImage() != null && !item.getMedicineImage().isEmpty()) { %>
-                                    <img src="image/<%= item.getMedicineImage() %>" alt="<%= item.getMedicineName() %>">
+                                <% if (item.getMedicineImage() != null && !item.getMedicineImage().isEmpty()) { 
+                                    String imgPath = item.getMedicineImage();
+                                    if (!imgPath.startsWith("image/")) {
+                                        imgPath = "image/" + imgPath;
+                                    }
+                                %>
+                                    <img src="<%= imgPath %>" alt="<%= item.getMedicineName() %>">
                                 <% } else { %>
                                     <i class="fas fa-pills"></i>
                                 <% } %>
@@ -595,10 +640,13 @@
             const btn = document.querySelector('.confirm-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            
+
             // Gộp thông tin giao hàng
-            const fullAddress = `Người nhận: ${receiverName}\nSĐT: ${receiverPhone}\nĐịa chỉ: ${shippingAddress}${orderNote ? '\nGhi chú: ' + orderNote : ''}`;
-            
+            let fullAddress = 'Người nhận: ' + receiverName + '\nSĐT: ' + receiverPhone + '\nĐịa chỉ: ' + shippingAddress;
+            if (orderNote) {
+                fullAddress += '\nGhi chú: ' + orderNote;
+            }
+
             const params = new URLSearchParams();
             params.append('shippingAddress', fullAddress);
             params.append('paymentMethod', paymentMethod);

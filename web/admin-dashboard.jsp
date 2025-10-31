@@ -1,11 +1,24 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="model.Employee" %>
+<%@ page import="model.User" %>
 <%
-    Employee admin = (Employee) session.getAttribute("employee");
-    if (admin == null) {
-        response.sendRedirect("auth-login.jsp");
-        return;
-    }
+    // Get current user from session (already validated by AdminDashboardServlet)
+    User currentUser = (User) session.getAttribute("currentUser");
+    
+    // Get statistics from request attributes (set by AdminDashboardServlet)
+    Integer totalMedicines = (Integer) request.getAttribute("totalMedicines");
+    Integer totalOrders = (Integer) request.getAttribute("totalOrders");
+    Integer totalCustomers = (Integer) request.getAttribute("totalCustomers");
+    Double totalRevenue = (Double) request.getAttribute("totalRevenue");
+    Integer pendingOrders = (Integer) request.getAttribute("pendingOrders");
+    Integer lowStockCount = (Integer) request.getAttribute("lowStockCount");
+    
+    // Set default values if null
+    if (totalMedicines == null) totalMedicines = 0;
+    if (totalOrders == null) totalOrders = 0;
+    if (totalCustomers == null) totalCustomers = 0;
+    if (totalRevenue == null) totalRevenue = 0.0;
+    if (pendingOrders == null) pendingOrders = 0;
+    if (lowStockCount == null) lowStockCount = 0;
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -35,7 +48,7 @@
         /* Sidebar */
         .sidebar {
             width: 260px;
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             position: fixed;
             height: 100vh;
@@ -185,7 +198,7 @@
 
         .search-bar input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0891b2;
         }
 
         .top-actions {
@@ -281,7 +294,7 @@
 
         .stat-icon.blue {
             background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
+            color: #0891b2;
         }
 
         .stat-icon.green {
@@ -387,7 +400,7 @@
         }
 
         .action-btn:hover {
-            border-color: #667eea;
+            border-color: #0891b2;
             background: #f8f9ff;
             transform: translateY(-2px);
         }
@@ -396,7 +409,7 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             display: flex;
             align-items: center;
@@ -444,33 +457,29 @@
             </div>
 
             <nav class="sidebar-menu">
-                <a href="#" class="menu-item active">
+                <a href="<%= request.getContextPath() %>/admin/dashboard" class="menu-item active">
                     <i class="fas fa-home"></i>
                     <span>Tổng quan</span>
                 </a>
-                <a href="products.jsp" class="menu-item">
+                <a href="<%= request.getContextPath() %>/admin/medicines" class="menu-item">
                     <i class="fas fa-pills"></i>
                     <span>Quản lý thuốc</span>
                 </a>
-                <a href="suppliers.jsp" class="menu-item">
+                <a href="<%= request.getContextPath() %>/admin/suppliers" class="menu-item">
                     <i class="fas fa-truck"></i>
                     <span>Nhà cung cấp</span>
                 </a>
-                <a href="#" class="menu-item">
+                <a href="<%= request.getContextPath() %>/admin/orders" class="menu-item">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Đơn hàng</span>
                 </a>
-                <a href="customer-view-products.jsp" class="menu-item">
+                <a href="<%= request.getContextPath() %>/admin-users.jsp" class="menu-item">
                     <i class="fas fa-users"></i>
                     <span>Khách hàng</span>
                 </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Báo cáo</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-cog"></i>
-                    <span>Cài đặt</span>
+                <a href="<%= request.getContextPath() %>/home.jsp" class="menu-item">
+                    <i class="fas fa-store"></i>
+                    <span>Xem cửa hàng</span>
                 </a>
             </nav>
 
@@ -480,10 +489,10 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <div class="user-details">
-                        <div class="user-name"><%= admin.getFullName() %></div>
-                        <div class="user-role"><%= admin.getRole() %></div>
+                        <div class="user-name"><%= currentUser.getName() %></div>
+                        <div class="user-role"><%= currentUser.getRole() %></div>
                     </div>
-                    <a href="logout" style="color: white; margin-left: 10px;">
+                    <a href="<%= request.getContextPath() %>/logout" style="color: white; margin-left: 10px;">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
@@ -513,7 +522,7 @@
             <div class="content-area">
                 <div class="page-header">
                     <h1 class="page-title">Bảng Điều Khiển</h1>
-                    <p class="page-subtitle">Chào mừng trở lại, <%= admin.getFullName() %>! Đây là tình hình hôm nay.</p>
+                    <p class="page-subtitle">Chào mừng trở lại, <%= currentUser.getName() %>! Đây là tình hình hôm nay.</p>
                 </div>
 
                 <!-- Stats Cards -->
@@ -524,12 +533,19 @@
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                         </div>
-                        <div class="stat-value">1,234</div>
+                        <div class="stat-value"><%= String.format("%,d", totalOrders) %></div>
                         <div class="stat-label">Tổng đơn hàng</div>
-                        <div class="stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            12.5% so với tháng trước
+                        <% if (pendingOrders > 0) { %>
+                        <div class="stat-trend orange">
+                            <i class="fas fa-clock"></i>
+                            <%= pendingOrders %> đơn chờ xử lý
                         </div>
+                        <% } else { %>
+                        <div class="stat-trend">
+                            <i class="fas fa-check"></i>
+                            Không có đơn chờ
+                        </div>
+                        <% } %>
                     </div>
 
                     <div class="stat-card">
@@ -538,11 +554,11 @@
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                         </div>
-                        <div class="stat-value">45,678,000₫</div>
-                        <div class="stat-label">Doanh thu</div>
+                        <div class="stat-value"><%= String.format("%,d", totalRevenue.longValue()) %>₫</div>
+                        <div class="stat-label">Tổng doanh thu</div>
                         <div class="stat-trend up">
-                            <i class="fas fa-arrow-up"></i>
-                            8.2% so với tháng trước
+                            <i class="fas fa-chart-line"></i>
+                            Tất cả các đơn hàng
                         </div>
                     </div>
 
@@ -552,12 +568,19 @@
                                 <i class="fas fa-pills"></i>
                             </div>
                         </div>
-                        <div class="stat-value">567</div>
+                        <div class="stat-value"><%= totalMedicines %></div>
                         <div class="stat-label">Loại thuốc</div>
+                        <% if (lowStockCount > 0) { %>
                         <div class="stat-trend down">
-                            <i class="fas fa-arrow-down"></i>
-                            3 sắp hết hàng
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <%= lowStockCount %> sắp hết hàng
                         </div>
+                        <% } else { %>
+                        <div class="stat-trend up">
+                            <i class="fas fa-check"></i>
+                            Hàng đầy đủ
+                        </div>
+                        <% } %>
                     </div>
 
                     <div class="stat-card">
@@ -566,7 +589,7 @@
                                 <i class="fas fa-users"></i>
                             </div>
                         </div>
-                        <div class="stat-value">2,891</div>
+                        <div class="stat-value"><%= String.format("%,d", totalCustomers) %></div>
                         <div class="stat-label">Khách hàng</div>
                         <div class="stat-trend up">
                             <i class="fas fa-arrow-up"></i>
@@ -577,21 +600,21 @@
 
                 <!-- Quick Actions -->
                 <div class="quick-actions">
-                    <a href="product-form.jsp" class="action-btn">
+                    <a href="<%= request.getContextPath() %>/admin/medicines?action=new" class="action-btn">
                         <i class="fas fa-plus"></i>
                         <span class="action-btn-text">Thêm thuốc mới</span>
                     </a>
-                    <a href="#" class="action-btn">
+                    <a href="<%= request.getContextPath() %>/admin/orders" class="action-btn">
                         <i class="fas fa-file-invoice"></i>
-                        <span class="action-btn-text">Tạo đơn hàng</span>
+                        <span class="action-btn-text">Quản lý đơn hàng</span>
                     </a>
-                    <a href="supplier-form.jsp" class="action-btn">
+                    <a href="<%= request.getContextPath() %>/admin/suppliers?action=new" class="action-btn">
                         <i class="fas fa-truck-loading"></i>
                         <span class="action-btn-text">Thêm nhà cung cấp</span>
                     </a>
-                    <a href="#" class="action-btn">
-                        <i class="fas fa-chart-line"></i>
-                        <span class="action-btn-text">Xem báo cáo</span>
+                    <a href="<%= request.getContextPath() %>/admin-users.jsp" class="action-btn">
+                        <i class="fas fa-users"></i>
+                        <span class="action-btn-text">Quản lý khách hàng</span>
                     </a>
                 </div>
 
@@ -627,7 +650,7 @@
                 datasets: [{
                     label: 'Doanh số',
                     data: [12000000, 19000000, 15000000, 25000000, 22000000, 30000000],
-                    borderColor: '#667eea',
+                    borderColor: '#0891b2',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
                     tension: 0.4,
                     fill: true
@@ -657,8 +680,8 @@
                 datasets: [{
                     data: [30, 25, 20, 15, 10],
                     backgroundColor: [
-                        '#667eea',
-                        '#764ba2',
+                        '#0891b2',
+                        '#0d9488',
                         '#f093fb',
                         '#4facfe',
                         '#00f2fe'

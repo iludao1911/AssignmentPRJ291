@@ -15,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -43,7 +43,7 @@
         .logo-icon {
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             border-radius: 15px;
             display: flex;
             align-items: center;
@@ -113,8 +113,8 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: #0891b2;
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
         }
 
         .form-control.error {
@@ -186,7 +186,7 @@
         }
 
         .terms a {
-            color: #667eea;
+            color: #0891b2;
             text-decoration: none;
         }
 
@@ -197,7 +197,7 @@
         .btn-primary {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891b2 0%, #0d9488 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -209,7 +209,7 @@
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(8, 145, 178, 0.3);
         }
 
         .btn-primary:disabled {
@@ -225,7 +225,7 @@
         }
 
         .signin-link a {
-            color: #667eea;
+            color: #0891b2;
             text-decoration: none;
             font-weight: 600;
         }

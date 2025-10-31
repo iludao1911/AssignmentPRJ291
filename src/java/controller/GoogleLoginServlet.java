@@ -80,8 +80,11 @@ public class GoogleLoginServlet extends HttpServlet {
             session.setAttribute("userRole", user.getRole());
             session.setMaxInactiveInterval(30 * 60); // 30 minutes
             
+            // Redirect URL dựa trên role
+            String redirectUrl = user.isAdmin() ? "admin/dashboard" : "home.jsp";
+            
             // Trả về success
-            response.getWriter().write("{\"success\": true, \"redirectUrl\": \"home.jsp\"}");
+            response.getWriter().write("{\"success\": true, \"redirectUrl\": \"" + redirectUrl + "\"}");
             
         } catch (SQLException e) {
             e.printStackTrace();

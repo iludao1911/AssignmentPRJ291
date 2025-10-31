@@ -115,6 +115,18 @@ public class Cart {
     public double getTotalPrice() {
         return getEffectivePrice() * quantity;
     }
+    
+    /**
+     * Setter methods for compatibility with check-out.jsp
+     */
+    public void setPrice(java.math.BigDecimal price) {
+        this.medicinePrice = price.doubleValue();
+    }
+    
+    public void setTotalPrice(java.math.BigDecimal totalPrice) {
+        // This is calculated, but we provide setter for JSP compatibility
+        // Do nothing or you can store it if needed
+    }
 
     @Override
     public String toString() {

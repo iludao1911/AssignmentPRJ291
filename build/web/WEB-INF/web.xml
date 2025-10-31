@@ -12,7 +12,13 @@
     
     <!-- Session configuration - Cấu hình session timeout -->
     <session-config>
-        <session-timeout>30</session-timeout>
+        <!-- Timeout tính bằng phút (120 phút = 2 giờ) -->
+        <session-timeout>120</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+            <!-- Để max-age dài hơn để session cookie không bị mất -->
+            <max-age>7200</max-age>
+        </cookie-config>
     </session-config>
     
     <!-- Error pages - Trang lỗi tùy chỉnh -->

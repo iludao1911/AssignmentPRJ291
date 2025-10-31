@@ -79,9 +79,9 @@ public class CartUpdateServlet extends HttpServlet {
                 
                 // Update quantity in cart
                 boolean updated = cartDAO.updateQuantityByUserAndMedicine(userId, medicineId, quantity);
-                
+
                 if (updated) {
-                    int cartCount = cartDAO.getCartItemCount(userId);
+                    int cartCount = cartDAO.getCartCount(userId);
                     result.put("success", true);
                     result.put("message", "Cập nhật thành công");
                     result.put("cartCount", cartCount);
@@ -93,9 +93,9 @@ public class CartUpdateServlet extends HttpServlet {
             } else if ("remove".equals(action)) {
                 // Remove item from cart
                 boolean removed = cartDAO.removeItemByUserAndMedicine(userId, medicineId);
-                
+
                 if (removed) {
-                    int cartCount = cartDAO.getCartItemCount(userId);
+                    int cartCount = cartDAO.getCartCount(userId);
                     result.put("success", true);
                     result.put("message", "Đã xóa sản phẩm");
                     result.put("cartCount", cartCount);

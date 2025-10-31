@@ -56,8 +56,8 @@ public class UpdateOrderStatusServlet extends HttpServlet {
             int orderId = Integer.parseInt(orderIdStr);
             
             if ("confirm-received".equals(action)) {
-                // Khách hàng xác nhận đã nhận hàng -> chuyển sang Done
-                boolean updated = orderDAO.updateOrderStatusOnly(orderId, "Done");
+                // Khách hàng xác nhận đã nhận hàng -> chuyển sang Hoàn thành
+                boolean updated = orderDAO.updateOrderStatusOnly(orderId, "Hoàn thành");
                 
                 if (updated) {
                     result.put("success", true);

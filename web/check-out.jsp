@@ -27,7 +27,7 @@
             OrderDAO orderDAO = new OrderDAO();
             Order order = orderDAO.getOrderById(pendingOrderId);
 
-            if (order != null && "Pending".equals(order.getStatus()) && order.getUserId() == currentUser.getUserId()) {
+            if (order != null && "Chờ thanh toán".equals(order.getStatus()) && order.getUserId() == currentUser.getUserId()) {
                 // Load order details và convert sang Cart để hiển thị
                 List<OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
                 cartItems = new java.util.ArrayList<>();
@@ -36,6 +36,7 @@
                     Cart cart = new Cart();
                     cart.setMedicineId(detail.getMedicineId());
                     cart.setMedicineName(detail.getMedicineName());
+                    cart.setMedicineImage(detail.getMedicineImage());
                     cart.setPrice(detail.getPrice());
                     cart.setQuantity(detail.getQuantity());
                     cart.setTotalPrice(detail.getTotalPrice());

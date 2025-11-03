@@ -14,8 +14,8 @@
     OrderDAO orderDAO = new OrderDAO();
     List<Order> doneOrders = null;
     try {
-        // Chỉ lấy đơn hàng đã Done (đã nhận hàng)
-        doneOrders = orderDAO.getOrdersByUserIdAndStatus(currentUser.getUserId(), "Done");
+        // Chỉ lấy đơn hàng đã hoàn thành (đã nhận hàng)
+        doneOrders = orderDAO.getOrdersByUserIdAndStatus(currentUser.getUserId(), "Hoàn thành");
     } catch (Exception e) {
         e.printStackTrace();
     }

@@ -244,7 +244,7 @@ public class OrderDAO {
     public List<model.OrderDetail> getOrderDetails(int orderId) throws SQLException {
         List<model.OrderDetail> details = new ArrayList<>();
         
-        String sql = "SELECT od.*, m.name as medicine_name, m.image as medicine_image " +
+        String sql = "SELECT od.*, m.name as medicine_name, m.image_path as medicine_image " +
                      "FROM OrderDetail od " +
                      "INNER JOIN Medicine m ON od.Medicine_id = m.Medicine_id " +
                      "WHERE od.Order_id = ?";

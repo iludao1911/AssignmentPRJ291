@@ -559,10 +559,10 @@
     <jsp:include page="chatbot-widget.jsp" />
     
     <% if (request.getAttribute("success") != null) { %>
-        <script>alert('<%= request.getAttribute("success") %>');</script>
+        <script>showToast('Thành công', '<%= request.getAttribute("success") %>', 'success');</script>
     <% } %>
     <% if (request.getAttribute("error") != null) { %>
-        <script>alert('<%= request.getAttribute("error") %>');</script>
+        <script>showToast('Lỗi', '<%= request.getAttribute("error") %>', 'error');</script>
     <% } %>
     
     <script>

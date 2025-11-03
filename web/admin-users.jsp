@@ -147,14 +147,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Đã cấm tài khoản thành công!');
+                    showToast('Thành công', 'Đã cấm tài khoản thành công!', 'success');
                     location.reload();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    showToast('Lỗi', 'Lỗi: ' + data.message, 'error');
                 }
             })
             .catch(err => {
-                alert('Chức năng đang phát triển. API chưa sẵn sàng.');
+                showToast('Thông báo', 'Chức năng đang phát triển. API chưa sẵn sàng.', 'info');
             });
         }
     }
@@ -170,14 +170,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Đã mở khóa tài khoản thành công!');
+                    showToast('Thành công', 'Đã mở khóa tài khoản thành công!', 'success');
                     location.reload();
                 } else {
-                    alert('Lỗi: ' + data.message);
+                    showToast('Lỗi', 'Lỗi: ' + data.message, 'error');
                 }
             })
             .catch(err => {
-                alert('Chức năng đang phát triển. API chưa sẵn sàng.');
+                showToast('Thông báo', 'Chức năng đang phát triển. API chưa sẵn sàng.', 'info');
             });
         }
     }

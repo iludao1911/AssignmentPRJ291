@@ -1,7 +1,9 @@
 package controller;
 
 import dao.CartDAO;
+import dao.MedicineDAO;
 import model.User;
+import model.Medicine;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,11 +20,13 @@ import java.util.Map;
 public class CartUpdateServlet extends HttpServlet {
     
     private CartDAO cartDAO;
+    private MedicineDAO medicineDAO;
     private Gson gson;
     
     @Override
     public void init() throws ServletException {
         cartDAO = new CartDAO();
+        medicineDAO = new MedicineDAO();
         gson = new Gson();
     }
     
@@ -73,6 +77,22 @@ public class CartUpdateServlet extends HttpServlet {
                 if (quantity <= 0) {
                     result.put("success", false);
                     result.put("message", "Số lượng phải lớn hơn 0");
+                    out.print(gson.toJson(result));
+                    return;
+                }
+                
+                // Kiểm tra số lượng tồn kho
+                Medicine medicine = medicineDAO.getMedicineById(medicineId);
+                if (medicine == null) {
+                    result.put("success", false);
+                    result.put("message", "Sản phẩm không tồn tại");
+                    out.print(gson.toJson(result));
+                    return;
+                }
+                
+                if (quantity > medicine.getQuantity()) {
+                    result.put("success", false);
+                    result.put("message", "Chỉ còn " + medicine.getQuantity() + " sản phẩm trong kho");
                     out.print(gson.toJson(result));
                     return;
                 }

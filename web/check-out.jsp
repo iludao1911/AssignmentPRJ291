@@ -620,17 +620,17 @@
             const paymentMethod = form.querySelector('[name="paymentMethod"]:checked').value;
             
             if (!receiverName) {
-                alert('Vui lòng nhập tên người nhận');
+                showToast('Thông báo', 'Vui lòng nhập tên người nhận', 'warning');
                 return;
             }
             
             if (!receiverPhone) {
-                alert('Vui lòng nhập số điện thoại');
+                showToast('Thông báo', 'Vui lòng nhập số điện thoại', 'warning');
                 return;
             }
             
             if (!shippingAddress) {
-                alert('Vui lòng nhập địa chỉ giao hàng');
+                showToast('Thông báo', 'Vui lòng nhập địa chỉ giao hàng', 'warning');
                 return;
             }
             
@@ -662,17 +662,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast('Thành công', data.message, 'success');
                     window.location.href = 'order-history.jsp';
                 } else {
-                    alert(data.message);
+                    showToast('Lỗi', data.message, 'error');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-check-circle"></i> Xác Nhận Thanh Toán';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check-circle"></i> Xác Nhận Thanh Toán';
             });

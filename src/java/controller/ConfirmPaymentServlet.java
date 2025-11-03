@@ -72,35 +72,64 @@ public class ConfirmPaymentServlet extends HttpServlet {
                 return;
             }
             
-            // Lấy danh sách OrderDetail để trừ số lượng thuốc
+            // Lấy danh sách OrderDetail để kiểm tra và trừ số lượng thuốc
             List<OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
             
-            // Cập nhật Order: status = Đã thanh toán (chờ admin xác nhận vận chuyển), shipping address
-            boolean updated = orderDAO.updateOrderStatus(pendingOrderId, "Đã thanh toán", shippingAddress);
-
-            if (updated) {
-                // Trừ số lượng thuốc trong kho
-                for (OrderDetail detail : orderDetails) {
-                    boolean decreased = medicineDAO.decreaseQuantity(detail.getMedicineId(), detail.getQuantity());
-                    if (!decreased) {
-                        // Log cảnh báo nếu không trừ được (có thể do hết hàng)
-                        System.err.println("WARNING: Could not decrease quantity for Medicine ID: " 
-                            + detail.getMedicineId() + ", Quantity: " + detail.getQuantity());
-                    }
+            // BƯỚC 1: Kiểm tra số lượng tồn kho trước khi thanh toán
+            for (OrderDetail detail : orderDetails) {
+                int medicineId = detail.getMedicineId();
+                int requestedQty = detail.getQuantity();
+                
+                // Lấy thông tin thuốc từ database
+                model.Medicine medicine = medicineDAO.getMedicineById(medicineId);
+                if (medicine == null) {
+                    result.put("success", false);
+                    result.put("message", "Sản phẩm ID " + medicineId + " không tồn tại");
+                    out.print(gson.toJson(result));
+                    return;
                 }
                 
-                // Xóa giỏ hàng sau khi thanh toán thành công
-                cartDAO.clearCart(currentUser.getUserId());
+                // Kiểm tra số lượng
+                if (medicine.getQuantity() < requestedQty) {
+                    result.put("success", false);
+                    result.put("message", "Sản phẩm '" + medicine.getName() + "' chỉ còn " + medicine.getQuantity() + " (bạn đặt " + requestedQty + "). Vui lòng cập nhật giỏ hàng.");
+                    out.print(gson.toJson(result));
+                    return;
+                }
+            }
+            
+            // BƯỚC 2: Tất cả đều đủ hàng, bắt đầu trừ kho
+            boolean allDecreased = true;
+            for (OrderDetail detail : orderDetails) {
+                boolean decreased = medicineDAO.decreaseQuantity(detail.getMedicineId(), detail.getQuantity());
+                if (!decreased) {
+                    allDecreased = false;
+                    System.err.println("CRITICAL: Failed to decrease quantity for Medicine ID: " 
+                        + detail.getMedicineId() + ", Quantity: " + detail.getQuantity());
+                }
+            }
+            
+            // BƯỚC 3: Nếu trừ kho thành công, mới cập nhật order status
+            if (allDecreased) {
+                boolean updated = orderDAO.updateOrderStatus(pendingOrderId, "Đã thanh toán", shippingAddress);
+                
+                if (updated) {
+                    // Xóa giỏ hàng sau khi thanh toán thành công
+                    cartDAO.clearCart(currentUser.getUserId());
 
-                // Xóa pendingOrderId khỏi session
-                session.removeAttribute("pendingOrderId");
+                    // Xóa pendingOrderId khỏi session
+                    session.removeAttribute("pendingOrderId");
 
-                result.put("success", true);
-                result.put("message", "Thanh toán thành công! Đơn hàng đang chờ xác nhận.");
-                result.put("orderId", pendingOrderId);
+                    result.put("success", true);
+                    result.put("message", "Thanh toán thành công! Đơn hàng đang chờ xác nhận.");
+                    result.put("orderId", pendingOrderId);
+                } else {
+                    result.put("success", false);
+                    result.put("message", "Xác nhận thanh toán thất bại");
+                }
             } else {
                 result.put("success", false);
-                result.put("message", "Xác nhận thanh toán thất bại");
+                result.put("message", "Có lỗi khi cập nhật kho hàng. Vui lòng thử lại sau.");
             }
             
         } catch (Exception e) {

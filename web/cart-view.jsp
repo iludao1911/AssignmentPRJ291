@@ -693,12 +693,12 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
             });
         }
 
@@ -706,13 +706,13 @@
             let newQuantity = parseInt(value);
 
             if (isNaN(newQuantity) || newQuantity < 1) {
-                alert('Số lượng phải là số dương');
+                showToast('Thông báo', 'Số lượng phải là số dương', 'warning');
                 location.reload();
                 return;
             }
 
             if (newQuantity > 999) {
-                alert('Số lượng tối đa là 999');
+                showToast('Thông báo', 'Số lượng tối đa là 999', 'warning');
                 location.reload();
                 return;
             }
@@ -735,12 +735,12 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
             });
         }
 
@@ -765,12 +765,12 @@
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
             });
         }
 

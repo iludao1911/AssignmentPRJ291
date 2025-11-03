@@ -1178,7 +1178,7 @@
             document.querySelectorAll('.add-to-cart-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const productName = this.closest('.product-card').querySelector('.product-name').textContent;
-                    alert('Đã thêm "' + productName + '" vào giỏ hàng!');
+                    showToast('Thành công', 'Đã thêm "' + productName + '" vào giỏ hàng!', 'success');
                 });
             });
         }
@@ -1413,7 +1413,7 @@
         // Add to cart from home page
         function addToCartFromHome(medicineId) {
             <% if (currentUser == null) { %>
-                alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+                showToast('Vui lòng đăng nhập', 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'warning');
                 window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
@@ -1432,26 +1432,26 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Đã thêm vào giỏ hàng!');
+                    showToast('Thành công', 'Đã thêm vào giỏ hàng!', 'success');
                     // Update cart count
                     const cartCount = document.querySelector('.cart-count');
                     if (cartCount) {
                         cartCount.textContent = data.cartCount;
                     }
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra khi thêm vào giỏ hàng');
+                showToast('Lỗi', 'Có lỗi xảy ra khi thêm vào giỏ hàng', 'error');
             });
         }
 
         // Buy now from home page
         function buyNowFromHome(medicineId) {
             <% if (currentUser == null) { %>
-                alert('Vui lòng đăng nhập để mua hàng');
+                showToast('Vui lòng đăng nhập', 'Vui lòng đăng nhập để mua hàng', 'warning');
                 window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
@@ -1472,12 +1472,12 @@
                 if (data.success) {
                     window.location.href = 'cart-view.jsp';
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra');
+                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
             });
         }
     </script>

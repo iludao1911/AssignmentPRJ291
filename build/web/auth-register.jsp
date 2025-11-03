@@ -400,7 +400,7 @@
             <span>Hoặc đăng ký với</span>
         </div>
 
-        <button class="btn-google" onclick="alert('Tính năng đăng ký Google chưa được triển khai')">
+        <button class="btn-google" onclick="showToast('Thông báo', 'Tính năng đăng ký Google chưa được triển khai', 'info')">
             <i class="fab fa-google"></i>
             Đăng ký với Google
         </button>
@@ -495,7 +495,7 @@
             // Validate terms
             const terms = document.getElementById('terms');
             if (!terms.checked) {
-                alert('Vui lòng đồng ý với Điều khoản & Điều kiện');
+                showToast('Thông báo', 'Vui lòng đồng ý với Điều khoản & Điều kiện', 'warning');
                 isValid = false;
             }
 

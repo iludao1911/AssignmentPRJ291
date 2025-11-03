@@ -178,6 +178,27 @@ public class CartDAO {
         
         return 0;
     }
+    
+    /**
+     * Lấy số lượng của một sản phẩm trong giỏ hàng của user
+     * @return số lượng nếu có, 0 nếu không có
+     */
+    public int getQuantityInCart(int userId, int medicineId) throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(CHECK_EXISTS)) {
+            
+            ps.setInt(1, userId);
+            ps.setInt(2, medicineId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("quantity");
+                }
+            }
+        }
+        
+        return 0;
+    }
 
     /**
      * Cập nhật số lượng sản phẩm theo userId và medicineId

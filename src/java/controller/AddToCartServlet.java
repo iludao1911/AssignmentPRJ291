@@ -1,7 +1,9 @@
 package controller;
 
 import dao.CartDAO;
+import dao.MedicineDAO;
 import model.User;
+import model.Medicine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,6 +21,7 @@ import java.sql.SQLException;
 public class AddToCartServlet extends HttpServlet {
 
     private CartDAO cartDAO = new CartDAO();
+    private MedicineDAO medicineDAO = new MedicineDAO();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -51,6 +54,22 @@ public class AddToCartServlet extends HttpServlet {
             
             if (quantity <= 0) {
                 response.getWriter().write("{\"success\": false, \"message\": \"Số lượng phải lớn hơn 0\"}");
+                return;
+            }
+            
+            // Kiểm tra số lượng tồn kho
+            Medicine medicine = medicineDAO.getMedicineById(medicineId);
+            if (medicine == null) {
+                response.getWriter().write("{\"success\": false, \"message\": \"Sản phẩm không tồn tại\"}");
+                return;
+            }
+            
+            // Lấy số lượng hiện tại trong giỏ hàng (nếu có)
+            int currentCartQty = cartDAO.getQuantityInCart(currentUser.getUserId(), medicineId);
+            int totalQuantity = currentCartQty + quantity;
+            
+            if (totalQuantity > medicine.getQuantity()) {
+                response.getWriter().write("{\"success\": false, \"message\": \"Chỉ còn " + medicine.getQuantity() + " sản phẩm trong kho (bạn đã có " + currentCartQty + " trong giỏ)\"}");
                 return;
             }
             

@@ -631,12 +631,12 @@
                     // Chuyển đến servlet checkout (GET) để load dữ liệu
                     window.location.href = 'checkout';
                 } else {
-                    alert(data.message || 'Có lỗi xảy ra khi tiếp tục thanh toán');
+                    showToast('Lỗi', data.message || 'Có lỗi xảy ra khi tiếp tục thanh toán', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra khi tiếp tục thanh toán');
+                showToast('Lỗi', 'Có lỗi xảy ra khi tiếp tục thanh toán', 'error');
             });
         }
 
@@ -659,15 +659,15 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Cảm ơn bạn! Đơn hàng đã được xác nhận hoàn thành.');
+                    showToast('Thành công', 'Cảm ơn bạn! Đơn hàng đã được xác nhận hoàn thành.', 'success');
                     location.reload();
                 } else {
-                    alert(data.message || 'Có lỗi xảy ra');
+                    showToast('Lỗi', data.message || 'Có lỗi xảy ra', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra khi xác nhận đơn hàng');
+                showToast('Lỗi', 'Có lỗi xảy ra khi xác nhận đơn hàng', 'error');
             });
         }
     </script>

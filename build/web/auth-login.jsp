@@ -530,12 +530,12 @@
                 if (data.success) {
                     window.location.href = data.redirectUrl || 'home.jsp';
                 } else {
-                    alert('Lỗi đăng nhập: ' + (data.message || 'Không xác định'));
+                    showToast('Lỗi đăng nhập', (data.message || 'Không xác định'), 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Lỗi kết nối server');
+                showToast('Lỗi', 'Lỗi kết nối server', 'error');
             });
         }
     </script>

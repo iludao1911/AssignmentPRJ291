@@ -1034,7 +1034,7 @@
                 
                 const rating = ratingValue.value;
                 if (rating == 0 || rating == '') {
-                    alert('Vui lòng chọn số sao đánh giá');
+                    showToast('Thông báo', 'Vui lòng chọn số sao đánh giá', 'warning');
                     return;
                 }
                 
@@ -1068,22 +1068,22 @@
                 .then(data => {
                     console.log('Response data:', data);
                     if (data.success) {
-                        alert(data.message);
+                        showToast('Thành công', data.message, 'success');
                         location.reload();
                     } else {
-                        alert(data.message);
+                        showToast('Thông báo', data.message, 'info');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Có lỗi xảy ra, vui lòng thử lại');
+                    showToast('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
                 });
             });
         }
 
         function addToCart() {
             <% if (currentUser == null) { %>
-                alert('Vui lòng đăng nhập để thêm vào giỏ hàng');
+                showToast('Vui lòng đăng nhập', 'Vui lòng đăng nhập để thêm vào giỏ hàng', 'warning');
                 window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
@@ -1092,7 +1092,7 @@
             const quantity = parseInt(document.getElementById('quantityInput').value);
 
             if (isNaN(quantity) || quantity < 1) {
-                alert('Vui lòng nhập số lượng hợp lệ');
+                showToast('Thông báo', 'Vui lòng nhập số lượng hợp lệ', 'warning');
                 return;
             }
 
@@ -1110,25 +1110,25 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showToast('Thành công', data.message, 'success');
                     // Update cart count if needed
                     if (data.cartCount) {
                         // You can update cart badge here
                         console.log('Cart count:', data.cartCount);
                     }
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra, vui lòng thử lại');
+                showToast('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
             });
         }
 
         function buyNow() {
             <% if (currentUser == null) { %>
-                alert('Vui lòng đăng nhập để mua hàng');
+                showToast('Vui lòng đăng nhập', 'Vui lòng đăng nhập để mua hàng', 'warning');
                 window.location.href = 'auth-login.jsp';
                 return;
             <% } %>
@@ -1138,7 +1138,7 @@
             const quantity = parseInt(document.getElementById('quantityInput').value);
 
             if (isNaN(quantity) || quantity < 1) {
-                alert('Vui lòng nhập số lượng hợp lệ');
+                showToast('Thông báo', 'Vui lòng nhập số lượng hợp lệ', 'warning');
                 return;
             }
 
@@ -1159,12 +1159,12 @@
                     // Chuyển đến trang giỏ hàng
                     window.location.href = 'cart-view.jsp';
                 } else {
-                    alert(data.message);
+                    showToast('Thông báo', data.message, 'info');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Có lỗi xảy ra, vui lòng thử lại');
+                showToast('Lỗi', 'Có lỗi xảy ra, vui lòng thử lại', 'error');
             });
         }
     </script>

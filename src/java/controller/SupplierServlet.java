@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet("/suppliers")
+@WebServlet("/admin/suppliers")
 public class SupplierServlet extends HttpServlet {
 
     private ISupplierService supplierService;
@@ -69,7 +69,7 @@ public class SupplierServlet extends HttpServlet {
     private void listSuppliers(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
         List<Supplier> listSuppliers = supplierService.getAllSuppliers();
         request.setAttribute("listSuppliers", listSuppliers);
-        request.getRequestDispatcher("/suppliers.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/suppliers.jsp").forward(request, response);
     }
     
 // Trong SupplierServlet.java
@@ -91,19 +91,19 @@ private void showNewForm(HttpServletRequest request, HttpServletResponse respons
     private void insertSupplier(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, IllegalArgumentException {
         Supplier newSupplier = extractSupplierFromRequest(request, 0); 
         supplierService.saveSupplier(newSupplier); 
-        response.sendRedirect("suppliers?action=list");
+        response.sendRedirect(request.getContextPath() + "/admin/suppliers");
     }
 
     private void updateSupplier(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, IllegalArgumentException {
         int id = Integer.parseInt(request.getParameter("id"));
         Supplier supplier = extractSupplierFromRequest(request, id); 
         supplierService.updateSupplier(supplier); 
-        response.sendRedirect("suppliers?action=list");
+        response.sendRedirect(request.getContextPath() + "/admin/suppliers");
     }
 
     private void deleteSupplier(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         supplierService.deleteSupplier(id);
-        response.sendRedirect("suppliers?action=list");
+        response.sendRedirect(request.getContextPath() + "/admin/suppliers");
     }
 }

@@ -9,11 +9,20 @@ public class Customer {
     private String email;
     private String phone;
     private String password;
+    private String role;
 
     public Customer() {
     }
 
     // Getters and Setters...
+    
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
     public int getCustomerId() {
         return customerId;
     }

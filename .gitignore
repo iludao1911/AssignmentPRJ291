@@ -1,1 +1,24 @@
 sql/
+
+# Configuration files with sensitive data
+src/conf/config.properties
+**/config.properties
+
+# Build directories
+build/
+dist/
+nbproject/private/
+
+# IDE files
+*.class
+*.log
+*.ctxt
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

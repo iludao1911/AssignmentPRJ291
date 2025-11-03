@@ -9,10 +9,9 @@ public class DBConnection {
     // Cấu hình thông tin kết nối
     private static final String DRIVER_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 
-    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=Project;encrypt=false;trustServerCertificate=true;";
+    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=Project;encrypt=false;trustServerCertificate=true;characterEncoding=UTF-8;";
     private static final String USER_DB = "sa";
     private static final String PASS_DB = "123456";
-
 
     public static Connection getConnection() {
         Connection con = null;

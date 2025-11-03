@@ -12,6 +12,11 @@ public class OrderDetail {
     private int medicineId;
     private int quantity;
     private BigDecimal price;
+    private BigDecimal subtotal;
+    
+    // Additional fields from JOIN query
+    private String medicineName;
+    private String medicineImage;
 
     public OrderDetail() {}
 
@@ -37,5 +42,21 @@ public class OrderDetail {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+    
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+    
+    public String getMedicineName() { return medicineName; }
+    public void setMedicineName(String medicineName) { this.medicineName = medicineName; }
+    
+    public String getMedicineImage() { return medicineImage; }
+    public void setMedicineImage(String medicineImage) { this.medicineImage = medicineImage; }
+    
+    /**
+     * Alias method for compatibility with check-out.jsp
+     */
+    public BigDecimal getTotalPrice() {
+        return subtotal != null ? subtotal : price.multiply(new BigDecimal(quantity));
+    }
 }
 

@@ -1,62 +1,100 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
-import java.io.IOException;
-import java.util.List;
-import model.Customer;
-import model.Order;
 import dao.OrderDAO;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import model.Order;
 
-@WebServlet("/order")
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+
+@WebServlet("/admin/orders")
 public class OrderServlet extends HttpServlet {
 
-    private OrderDAO orderDAO = new OrderDAO();
+    private OrderDAO orderDAO;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        Customer customer = (Customer) session.getAttribute("currentCustomer");
-
-        if (customer == null) {
-            response.sendRedirect("customer-login.jsp");
-            return;
-        }
-
-        // Lấy danh sách đơn hàng của khách hàng hiện tại
-        List<Order> orderList = orderDAO.getOrdersByCustomerId(customer.getCustomerId());
-        request.setAttribute("orderList", orderList);
-        request.getRequestDispatcher("order-history.jsp").forward(request, response);
+    public void init() throws ServletException {
+        this.orderDAO = new OrderDAO();
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        if (action == null) action = "list";
 
-        if ("delete".equals(action)) {
-            int orderId = Integer.parseInt(request.getParameter("orderId"));
-            boolean deleted = orderDAO.deleteOrder(orderId);
-
-            if (deleted) {
-                request.setAttribute("message", "Đã xóa đơn hàng thành công!");
-            } else {
-                request.setAttribute("message", "Không thể xóa đơn hàng!");
-            }
-
-            // Sau khi xóa, load lại danh sách đơn hàng
-            HttpSession session = request.getSession();
-            Customer customer = (Customer) session.getAttribute("currentCustomer");
-            List<Order> orderList = orderDAO.getOrdersByCustomerId(customer.getCustomerId());
-            request.setAttribute("orderList", orderList);
-            request.getRequestDispatcher("order-history.jsp").forward(request, response);
+        try {
+            if ("view".equals(action)) viewOrder(request, response);
+            else if ("getDetails".equals(action)) getOrderDetails(request, response);
+            else if ("updateStatus".equals(action)) updateStatus(request, response);
+            else if ("delete".equals(action)) deleteOrder(request, response);
+            else listOrders(request, response);
+        } catch (SQLException ex) {
+            throw new ServletException(ex);
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        try {
+            if ("updateStatus".equals(action)) updateStatus(request, response);
+        } catch (SQLException ex) {
+            throw new ServletException(ex);
+        }
+    }
+
+    private void listOrders(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+        List<Order> orders = orderDAO.getAllOrders();
+        request.setAttribute("orders", orders);
+        request.getRequestDispatcher("/admin/orders.jsp").forward(request, response);
+    }
+
+    private void viewOrder(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
+        int orderId = Integer.parseInt(request.getParameter("id"));
+        Order order = orderDAO.getOrderById(orderId);
+        request.setAttribute("order", order);
+        request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
+    }
+    
+    private void getOrderDetails(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        int orderId = Integer.parseInt(request.getParameter("id"));
+        Order order = orderDAO.getOrderById(orderId);
+        
+        StringBuilder json = new StringBuilder();
+        json.append("{\"items\":[");
+        
+        if (order != null && order.getOrderDetails() != null) {
+            for (int i = 0; i < order.getOrderDetails().size(); i++) {
+                if (i > 0) json.append(",");
+                var item = order.getOrderDetails().get(i);
+                json.append("{");
+                json.append("\"medicineName\":\"").append(item.getMedicineName()).append("\",");
+                json.append("\"quantity\":").append(item.getQuantity()).append(",");
+                json.append("\"price\":").append(item.getPrice());
+                json.append("}");
+            }
+        }
+        
+        json.append("]}");
+        response.getWriter().write(json.toString());
+    }
+
+    private void updateStatus(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        int orderId = Integer.parseInt(request.getParameter("id"));
+        String status = request.getParameter("status");
+        orderDAO.updateOrderStatusOnly(orderId, status);
+        response.sendRedirect(request.getContextPath() + "/admin/orders");
+    }
+
+    private void deleteOrder(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        int orderId = Integer.parseInt(request.getParameter("id"));
+        orderDAO.deleteOrder(orderId);
+        response.sendRedirect(request.getContextPath() + "/admin/orders");
     }
 }

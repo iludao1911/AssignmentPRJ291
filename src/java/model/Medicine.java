@@ -9,6 +9,7 @@ public class Medicine {
     private String name;
     private String description;
     private BigDecimal price;
+    private BigDecimal salePrice; // Added salePrice
     private int quantity;
     private String category;
     private Date expiryDate;
@@ -16,18 +17,21 @@ public class Medicine {
     
     public Medicine() {}
 
-    public Medicine(int medicineId, int supplierId, String name, String description, BigDecimal price, int quantity, String category, Date expiryDate, String imagePath) {
+    // Updated constructor
+    public Medicine(int medicineId, int supplierId, String name, String description, BigDecimal price, BigDecimal salePrice, int quantity, String category, Date expiryDate, String imagePath) {
         this.medicineId = medicineId;
         this.supplierId = supplierId;
         this.name = name;
         this.description = description;
         this.price = price;
+        this.salePrice = salePrice;
         this.quantity = quantity;
         this.category = category;
         this.expiryDate = expiryDate;
         this.imagePath = imagePath;
     }
 
+    // Getters and Setters
     public int getMedicineId() { return medicineId; }
     public void setMedicineId(int medicineId) { this.medicineId = medicineId; }
     public int getSupplierId() { return supplierId; }
@@ -38,6 +42,8 @@ public class Medicine {
     public void setDescription(String description) { this.description = description; }
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+    public BigDecimal getSalePrice() { return salePrice; } // Added getter
+    public void setSalePrice(BigDecimal salePrice) { this.salePrice = salePrice; } // Added setter
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
     public String getCategory() { return category; }

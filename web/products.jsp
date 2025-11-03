@@ -14,7 +14,7 @@
 </head>
 <body>
     <c:if test="${empty sessionScope.currentEmployee}">
-        <c:redirect url="login.jsp" />
+        <c:redirect url="auth-login.jsp" />
     </c:if>
     
     <h1>Danh mục Thuốc</h1>

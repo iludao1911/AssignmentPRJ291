@@ -1,80 +1,337 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
+import model.Order;
+import model.Cart;
 import java.sql.*;
-import java.util.List;
-import model.*;
-import dao.DBConnection;
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * DAO class để xử lý các thao tác với bảng Order và OrderDetail
+ */
 public class OrderDAO {
-    public int createOrder(Order order) throws SQLException {
-        String sql = "INSERT INTO Orders (customer_id, total_amount) VALUES (?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setInt(1, order.getCustomerId());
-            stmt.setBigDecimal(2, order.getTotalAmount());
-            stmt.executeUpdate();
-
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) return rs.getInt(1);
-        }
-        return -1;
-    }
-
-    public void addOrderDetails(int orderId, List<CartItem> cartItems) throws SQLException {
-        String sql = "INSERT INTO OrderDetails (order_id, medicine_id, quantity, price) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            for (CartItem item : cartItems) {
-                stmt.setInt(1, orderId);
-                stmt.setInt(2, item.getMedicine().getMedicineId());
-                stmt.setInt(3, item.getQuantity());
-                stmt.setBigDecimal(4, item.getMedicine().getPrice());
-                stmt.addBatch();
+    
+    // SQL QUERIES
+    private static final String INSERT_ORDER = 
+        "INSERT INTO [Order] (User_id, total_amount, status, shipping_address) " +
+        "VALUES (?, ?, ?, ?)";
+    
+    private static final String INSERT_ORDER_DETAIL = 
+        "INSERT INTO OrderDetail (Order_id, Medicine_id, quantity, unit_price, subtotal) " +
+        "VALUES (?, ?, ?, ?, ?)";
+    
+    private static final String UPDATE_ORDER_STATUS = 
+        "UPDATE [Order] SET status = ?, shipping_address = ? WHERE Order_id = ?";
+    
+    private static final String SELECT_ORDER_BY_ID = 
+        "SELECT o.*, u.name as user_name, u.email as user_email " +
+        "FROM [Order] o " +
+        "INNER JOIN [User] u ON o.User_id = u.User_id " +
+        "WHERE o.Order_id = ?";
+    
+    private static final String SELECT_ORDERS_BY_USER = 
+        "SELECT o.*, u.name as user_name, u.email as user_email " +
+        "FROM [Order] o " +
+        "INNER JOIN [User] u ON o.User_id = u.User_id " +
+        "WHERE o.User_id = ? " +
+        "ORDER BY o.order_date DESC";
+    
+    private static final String SELECT_ALL_ORDERS = 
+        "SELECT o.*, u.name as user_name, u.email as user_email " +
+        "FROM [Order] o " +
+        "INNER JOIN [User] u ON o.User_id = u.User_id " +
+        "ORDER BY o.order_date DESC";
+    
+    /**
+     * Tạo Order mới kèm OrderDetail từ Cart
+     * Transaction: Tạo Order -> Tạo OrderDetail -> Return Order_id
+     */
+    public int createOrderWithDetails(Order order, List<Cart> cartItems) throws SQLException {
+        Connection conn = null;
+        PreparedStatement psOrder = null;
+        PreparedStatement psDetail = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+            
+            // 1. Insert Order
+            psOrder = conn.prepareStatement(INSERT_ORDER, Statement.RETURN_GENERATED_KEYS);
+            psOrder.setInt(1, order.getUserId());
+            psOrder.setDouble(2, order.getTotalAmount());
+            psOrder.setString(3, order.getStatus());
+            psOrder.setString(4, order.getShippingAddress());
+            
+            int affectedRows = psOrder.executeUpdate();
+            
+            if (affectedRows == 0) {
+                conn.rollback();
+                return 0;
             }
-            stmt.executeBatch();
+            
+            // Get generated Order_id
+            rs = psOrder.getGeneratedKeys();
+            int orderId = 0;
+            if (rs.next()) {
+                orderId = rs.getInt(1);
+            }
+            
+            if (orderId == 0) {
+                conn.rollback();
+                return 0;
+            }
+            
+            // 2. Insert OrderDetails
+            psDetail = conn.prepareStatement(INSERT_ORDER_DETAIL);
+            
+            for (Cart item : cartItems) {
+                double unitPrice = item.getEffectivePrice();
+                double subtotal = unitPrice * item.getQuantity();
+                
+                psDetail.setInt(1, orderId);
+                psDetail.setInt(2, item.getMedicineId());
+                psDetail.setInt(3, item.getQuantity());
+                psDetail.setDouble(4, unitPrice);
+                psDetail.setDouble(5, subtotal);
+                
+                psDetail.addBatch();
+            }
+            
+            psDetail.executeBatch();
+            
+            conn.commit(); // Commit transaction
+            return orderId;
+            
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw e;
+        } finally {
+            if (rs != null) rs.close();
+            if (psOrder != null) psOrder.close();
+            if (psDetail != null) psDetail.close();
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
         }
     }
-    public List<Order> getOrdersByCustomerId(int customerId) {
-    List<Order> list = new ArrayList<>();
-    String sql = "SELECT * FROM [Order] WHERE customerId = ? ORDER BY orderDate DESC";
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setInt(1, customerId);
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-        Order o = new Order();
-        o.setOrderId(rs.getInt("orderId"));
-        o.setCustomerId(rs.getInt("customerId"));
-        o.setOrderDate(rs.getTimestamp("orderDate"));
-        o.setTotalAmount(rs.getBigDecimal("total"));
-        o.setPaymentMethod(rs.getString("paymentMethod"));
-        o.setAddress(rs.getString("address"));
-        list.add(o);
-}
-
-    } catch (Exception e) {
-        e.printStackTrace();
+    
+    /**
+     * Cập nhật trạng thái Order
+     */
+    public boolean updateOrderStatus(int orderId, String status, String shippingAddress) throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(UPDATE_ORDER_STATUS)) {
+            
+            ps.setString(1, status);
+            ps.setString(2, shippingAddress);
+            ps.setInt(3, orderId);
+            
+            return ps.executeUpdate() > 0;
+        }
     }
-    return list;
-}
-    public boolean deleteOrder(int orderId) {
-        String sql = "DELETE FROM Orders WHERE orderId = ?";
+    
+    /**
+     * Lấy Order theo ID
+     */
+    public Order getOrderById(int orderId) throws SQLException {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_ORDER_BY_ID)) {
+            
+            ps.setInt(1, orderId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return extractOrderFromResultSet(rs);
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Lấy danh sách Order của user
+     */
+    public List<Order> getOrdersByUserId(int userId) throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_ORDERS_BY_USER)) {
+            
+            ps.setInt(1, userId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(extractOrderFromResultSet(rs));
+                }
+            }
+        }
+        
+        return orders;
+    }
+    
+    /**
+     * Lấy danh sách Order theo status
+     */
+    public List<Order> getOrdersByUserIdAndStatus(int userId, String... statuses) throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        
+        if (statuses == null || statuses.length == 0) {
+            return orders;
+        }
+        
+        StringBuilder sql = new StringBuilder(
+            "SELECT o.*, u.name as user_name, u.email as user_email " +
+            "FROM [Order] o " +
+            "INNER JOIN [User] u ON o.User_id = u.User_id " +
+            "WHERE o.User_id = ? AND o.status IN ("
+        );
+        
+        for (int i = 0; i < statuses.length; i++) {
+            sql.append("?");
+            if (i < statuses.length - 1) {
+                sql.append(", ");
+            }
+        }
+        
+        sql.append(") ORDER BY o.order_date DESC");
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            
+            ps.setInt(1, userId);
+            for (int i = 0; i < statuses.length; i++) {
+                ps.setString(i + 2, statuses[i]);
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(extractOrderFromResultSet(rs));
+                }
+            }
+        }
+        
+        return orders;
+    }
+    
+    /**
+     * Cập nhật chỉ status của Order
+     */
+    public boolean updateOrderStatusOnly(int orderId, String status) throws SQLException {
+        String sql = "UPDATE [Order] SET status = ? WHERE Order_id = ?";
+        
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
+            
+            ps.setString(1, status);
+            ps.setInt(2, orderId);
+            
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return false;
     }
-
+    
+    /**
+     * Lấy danh sách OrderDetail theo Order_id
+     */
+    public List<model.OrderDetail> getOrderDetails(int orderId) throws SQLException {
+        List<model.OrderDetail> details = new ArrayList<>();
+        
+        String sql = "SELECT od.*, m.name as medicine_name, m.image as medicine_image " +
+                     "FROM OrderDetail od " +
+                     "INNER JOIN Medicine m ON od.Medicine_id = m.Medicine_id " +
+                     "WHERE od.Order_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, orderId);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    model.OrderDetail detail = new model.OrderDetail();
+                    detail.setOrderDetailId(rs.getInt("OrderDetail_id"));
+                    detail.setOrderId(rs.getInt("Order_id"));
+                    detail.setMedicineId(rs.getInt("Medicine_id"));
+                    detail.setQuantity(rs.getInt("quantity"));
+                    detail.setPrice(rs.getBigDecimal("unit_price"));
+                    detail.setSubtotal(rs.getBigDecimal("subtotal"));
+                    detail.setMedicineName(rs.getString("medicine_name"));
+                    detail.setMedicineImage(rs.getString("medicine_image"));
+                    
+                    details.add(detail);
+                }
+            }
+        }
+        
+        return details;
+    }
+    
+    /**
+     * Get all orders (Admin)
+     */
+    public List<Order> getAllOrders() throws SQLException {
+        List<Order> orders = new ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_ALL_ORDERS);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                orders.add(extractOrderFromResultSet(rs));
+            }
+        }
+        
+        return orders;
+    }
+    
+    /**
+     * Extract Order object from ResultSet
+     */
+    private Order extractOrderFromResultSet(ResultSet rs) throws SQLException {
+        Order order = new Order();
+        order.setOrderId(rs.getInt("Order_id"));
+        order.setUserId(rs.getInt("User_id"));
+        order.setOrderDate(rs.getTimestamp("order_date"));
+        order.setTotalAmount(rs.getDouble("total_amount"));
+        order.setStatus(rs.getString("status"));
+        order.setShippingAddress(rs.getString("shipping_address"));
+        order.setUserName(rs.getString("user_name"));
+        order.setUserEmail(rs.getString("user_email"));
+        
+        return order;
+    }
+    
+    /**
+     * Xóa Order và các OrderDetail liên quan
+     */
+    public void deleteOrder(int orderId) throws SQLException {
+        String deleteDetails = "DELETE FROM OrderDetail WHERE Order_id = ?";
+        String deleteOrder = "DELETE FROM [Order] WHERE Order_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            
+            try (PreparedStatement ps1 = conn.prepareStatement(deleteDetails)) {
+                ps1.setInt(1, orderId);
+                ps1.executeUpdate();
+            }
+            
+            try (PreparedStatement ps2 = conn.prepareStatement(deleteOrder)) {
+                ps2.setInt(1, orderId);
+                ps2.executeUpdate();
+            }
+            
+            conn.commit();
+        } catch (SQLException e) {
+            throw e;
+        }
+    }
 }
-

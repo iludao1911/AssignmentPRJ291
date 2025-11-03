@@ -3,25 +3,32 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/ReviewDAO.java</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/service/EmployeeServiceImpl.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/check-out.jsp</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/CheckoutServlet.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/VerificationTokenDAO.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/model/Review.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/EmployeeDAO.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/UpdateOrderStatusServlet.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin/orders.jsp</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/ConfirmPaymentServlet.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin/orders.jsp</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/WEB-INF/web.xml</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin/dashboard.jsp</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin-dashboard.jsp</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/cart-view.jsp</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin/users.jsp</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/MedicineDAO.java</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/GoogleLoginServlet.java</file>
-            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/UserDAO.java</file>
             <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/CartUpdateServlet.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/ReviewDAO.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/check-out.jsp</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/VerificationTokenDAO.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/ChatbotServlet.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/AuthRegisterServlet.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/model/Review.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin-users.jsp</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/EmployeeDAO.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/controller/UpdateOrderStatusServlet.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/filter/AdminAuthFilter.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/config/ChatbotConfig.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/listener/RequestListener.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin/dashboard.jsp</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/admin-dashboard.jsp</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/web/cart-view.jsp</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/listener/SessionListener.java</file>
+            <file>file:/D:/Ky8/PRJ/AssignmentPRJ291/src/java/dao/UserDAO.java</file>
         </group>
     </open-files>
 </project-private>

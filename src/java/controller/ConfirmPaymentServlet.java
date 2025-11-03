@@ -2,7 +2,9 @@ package controller;
 
 import dao.OrderDAO;
 import dao.CartDAO;
+import dao.MedicineDAO;
 import model.User;
+import model.OrderDetail;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @WebServlet(name = "ConfirmPaymentServlet", urlPatterns = {"/confirm-payment"})
@@ -20,12 +23,14 @@ public class ConfirmPaymentServlet extends HttpServlet {
     
     private OrderDAO orderDAO;
     private CartDAO cartDAO;
+    private MedicineDAO medicineDAO;
     private Gson gson;
     
     @Override
     public void init() throws ServletException {
         orderDAO = new OrderDAO();
         cartDAO = new CartDAO();
+        medicineDAO = new MedicineDAO();
         gson = new Gson();
     }
     
@@ -67,10 +72,23 @@ public class ConfirmPaymentServlet extends HttpServlet {
                 return;
             }
             
+            // Lấy danh sách OrderDetail để trừ số lượng thuốc
+            List<OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
+            
             // Cập nhật Order: status = Đã thanh toán (chờ admin xác nhận vận chuyển), shipping address
             boolean updated = orderDAO.updateOrderStatus(pendingOrderId, "Đã thanh toán", shippingAddress);
 
             if (updated) {
+                // Trừ số lượng thuốc trong kho
+                for (OrderDetail detail : orderDetails) {
+                    boolean decreased = medicineDAO.decreaseQuantity(detail.getMedicineId(), detail.getQuantity());
+                    if (!decreased) {
+                        // Log cảnh báo nếu không trừ được (có thể do hết hàng)
+                        System.err.println("WARNING: Could not decrease quantity for Medicine ID: " 
+                            + detail.getMedicineId() + ", Quantity: " + detail.getQuantity());
+                    }
+                }
+                
                 // Xóa giỏ hàng sau khi thanh toán thành công
                 cartDAO.clearCart(currentUser.getUserId());
 

@@ -218,4 +218,23 @@ public class MedicineDAO {
             return ps.executeUpdate() > 0;
         }
     }
+
+    /**
+     * Giảm số lượng thuốc trong kho
+     * @param medicineId ID của thuốc
+     * @param quantity Số lượng cần giảm
+     * @return true nếu cập nhật thành công
+     */
+    public boolean decreaseQuantity(int medicineId, int quantity) throws SQLException {
+        String sql = "UPDATE Medicine SET quantity = quantity - ? WHERE Medicine_id = ? AND quantity >= ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, quantity);
+            ps.setInt(2, medicineId);
+            ps.setInt(3, quantity); // Đảm bảo số lượng đủ
+            
+            return ps.executeUpdate() > 0;
+        }
+    }
 }

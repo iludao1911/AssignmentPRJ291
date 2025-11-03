@@ -15,31 +15,6 @@
 </div>
 
 <div class="content-card">
-    <!-- Tabs -->
-    <div style="border-bottom: 2px solid #e5e7eb; margin-bottom: 25px;">
-        <div style="display: flex; gap: 0; overflow-x: auto;">
-            <button class="status-tab active" data-status="" style="padding: 15px 25px; background: none; border: none; border-bottom: 3px solid #0891b2; color: #0891b2; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
-                Tất cả (<span class="tab-count" data-status="">0</span>)
-            </button>
-            <button class="status-tab" data-status="Pending" style="padding: 15px 25px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
-                Chờ xử lý (<span class="tab-count" data-status="Pending">0</span>)
-            </button>
-            <button class="status-tab" data-status="Processing" style="padding: 15px 25px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
-                Đang xử lý (<span class="tab-count" data-status="Processing">0</span>)
-            </button>
-            <button class="status-tab" data-status="Shipped" style="padding: 15px 25px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
-                Đang giao (<span class="tab-count" data-status="Shipped">0</span>)
-            </button>
-            <button class="status-tab" data-status="Done" style="padding: 15px 25px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
-                Hoàn thành (<span class="tab-count" data-status="Done">0</span>)
-            </button>
-            <button class="status-tab" data-status="Cancelled" style="padding: 15px 25px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
-                Đã hủy (<span class="tab-count" data-status="Cancelled">0</span>)
-            </button>
-        </div>
-    </div>
-
-    <div class="content-card">
     <!-- Status Tabs -->
     <div style="border-bottom: 2px solid #e5e7eb; margin-bottom: 25px;">
         <div style="display: flex; gap: 0; overflow-x: auto;">

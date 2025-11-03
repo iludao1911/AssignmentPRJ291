@@ -78,7 +78,7 @@ public class AdminDashboardServlet extends HttpServlet {
             rs.close();
             
             // Pending orders
-            String sqlPendingOrders = "SELECT COUNT(*) as total FROM [Order] WHERE status = 'Pending'";
+            String sqlPendingOrders = "SELECT COUNT(*) as total FROM [Order] WHERE status = 'Chờ thanh toán'";
             rs = stmt.executeQuery(sqlPendingOrders);
             int pendingOrders = 0;
             if (rs.next()) {

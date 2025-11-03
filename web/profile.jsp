@@ -12,12 +12,17 @@
     }
     
     OrderDAO orderDAO = new OrderDAO();
-    List<Order> doneOrders = null;
+    List<Order> doneOrders = new java.util.ArrayList<>();
     try {
         // Chỉ lấy đơn hàng đã hoàn thành (đã nhận hàng)
-        doneOrders = orderDAO.getOrdersByUserIdAndStatus(currentUser.getUserId(), "Hoàn thành");
+        List<Order> orders = orderDAO.getOrdersByUserIdAndStatus(currentUser.getUserId(), "Hoàn thành");
+        if (orders != null) {
+            doneOrders = orders;
+        }
     } catch (Exception e) {
+        System.err.println("[ERROR] Failed to load done orders: " + e.getMessage());
         e.printStackTrace();
+        // Không throw exception, chỉ log và tiếp tục với empty list
     }
     
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -504,7 +509,7 @@
                     for (int i = 0; i < displayCount; i++) {
                         Order order = doneOrders.get(i);
                 %>
-                    <div class="order-card">
+                    <div class="order-card" onclick="viewOrderDetail(<%= order.getOrderId() %>)" style="cursor: pointer;">
                         <div class="order-header">
                             <div>
                                 <div class="order-id">Đơn hàng #<%= order.getOrderId() %></div>
@@ -531,6 +536,25 @@
         </div>
     </div>
 
+    <!-- Order Detail Modal -->
+    <div id="orderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; border-radius: 12px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative;">
+            <div style="padding: 25px; border-bottom: 2px solid #e5e7eb;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="color: #333; margin: 0;">Chi Tiết Đơn Hàng</h2>
+                    <button onclick="closeModal()" style="background: none; border: none; font-size: 28px; color: #666; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                </div>
+            </div>
+            
+            <div id="modalContent" style="padding: 25px;">
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #0891b2;"></i>
+                    <p style="margin-top: 15px; color: #666;">Đang tải thông tin...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI Chatbot Widget -->
     <jsp:include page="chatbot-widget.jsp" />
     
@@ -546,6 +570,115 @@
             const userCard = document.getElementById('userCard');
             userCard.classList.toggle('edit-mode');
         }
+
+        function viewOrderDetail(orderId) {
+            const modal = document.getElementById('orderModal');
+            modal.style.display = 'flex';
+            
+            // Load order details via AJAX
+            fetch('order-details?orderId=' + orderId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayOrderDetails(data.order);
+                    } else {
+                        document.getElementById('modalContent').innerHTML = 
+                            '<div style="text-align: center; padding: 40px;"><i class="fas fa-exclamation-triangle" style="font-size: 32px; color: #ef4444;"></i><p style="margin-top: 15px; color: #666;">' + data.message + '</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('modalContent').innerHTML = 
+                        '<div style="text-align: center; padding: 40px;"><i class="fas fa-exclamation-triangle" style="font-size: 32px; color: #ef4444;"></i><p style="margin-top: 15px; color: #666;">Có lỗi xảy ra khi tải thông tin</p></div>';
+                });
+        }
+
+        function displayOrderDetails(order) {
+            let statusColor = '#10b981';
+            let statusText = order.status;
+            
+            if (order.status === 'Chờ thanh toán') {
+                statusColor = '#f59e0b';
+            } else if (order.status === 'Đã thanh toán') {
+                statusColor = '#3b82f6';
+            } else if (order.status === 'Đang giao') {
+                statusColor = '#6366f1';
+            } else if (order.status === 'Đã hủy') {
+                statusColor = '#ef4444';
+            }
+
+            let itemsHtml = '';
+            if (order.items && order.items.length > 0) {
+                order.items.forEach(item => {
+                    let imgPath = item.medicineImage || '';
+                    if (imgPath && !imgPath.startsWith('image/')) {
+                        imgPath = 'image/' + imgPath;
+                    }
+                    
+                    let imgHtml = imgPath 
+                        ? '<img src="' + imgPath + '" alt="' + item.medicineName + '" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;">'
+                        : '<div style="width: 60px; height: 60px; background: #e5e7eb; border-radius: 6px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-pills" style="color: #9ca3af;"></i></div>';
+                    
+                    itemsHtml += '<div style="display: flex; gap: 15px; padding: 15px; background: #f9fafb; border-radius: 8px; margin-bottom: 10px;">' +
+                        imgHtml +
+                        '<div style="flex: 1;">' +
+                            '<div style="font-weight: 600; color: #333; margin-bottom: 5px;">' + item.medicineName + '</div>' +
+                            '<div style="color: #666; font-size: 14px;">Số lượng: ' + item.quantity + '</div>' +
+                        '</div>' +
+                        '<div style="text-align: right;">' +
+                            '<div style="font-weight: 600; color: #0891b2;">' + item.subtotal.toLocaleString('vi-VN') + 'đ</div>' +
+                            '<div style="color: #666; font-size: 14px;">' + item.unitPrice.toLocaleString('vi-VN') + 'đ/sp</div>' +
+                        '</div>' +
+                    '</div>';
+                });
+            }
+
+            let addressHtml = order.shippingAddress 
+                ? '<div><span style="color: #666;">Địa chỉ giao hàng:</span><div style="color: #333; margin-top: 5px; white-space: pre-line;">' + order.shippingAddress + '</div></div>'
+                : '';
+
+            const html = '<div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">' +
+                    '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">' +
+                        '<div>' +
+                            '<h3 style="color: #333; margin: 0 0 5px 0;">Đơn hàng #' + order.orderId + '</h3>' +
+                            '<p style="color: #666; margin: 0; font-size: 14px;"><i class="far fa-clock"></i> ' + order.orderDate + '</p>' +
+                        '</div>' +
+                        '<span style="background: ' + statusColor + '; color: white; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;">' + statusText + '</span>' +
+                    '</div>' +
+                    '<div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">' +
+                        '<div style="margin-bottom: 10px;">' +
+                            '<span style="color: #666;">Khách hàng:</span>' +
+                            '<span style="color: #333; font-weight: 600; margin-left: 10px;">' + order.customerName + '</span>' +
+                        '</div>' +
+                        '<div style="margin-bottom: 10px;">' +
+                            '<span style="color: #666;">Email:</span>' +
+                            '<span style="color: #333; margin-left: 10px;">' + order.customerEmail + '</span>' +
+                        '</div>' +
+                        addressHtml +
+                    '</div>' +
+                '</div>' +
+                '<h3 style="color: #333; margin: 0 0 15px 0;">Sản phẩm</h3>' +
+                itemsHtml +
+                '<div style="border-top: 2px solid #e5e7eb; margin-top: 20px; padding-top: 20px;">' +
+                    '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                        '<span style="font-size: 18px; font-weight: 600; color: #333;">Tổng cộng:</span>' +
+                        '<span style="font-size: 24px; font-weight: 700; color: #0891b2;">' + order.totalAmount.toLocaleString('vi-VN') + 'đ</span>' +
+                    '</div>' +
+                '</div>';
+            
+            document.getElementById('modalContent').innerHTML = html;
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('orderModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>

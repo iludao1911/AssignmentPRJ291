@@ -616,76 +616,10 @@
                 flex-direction: column;
             }
         }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 10000;
-            animation: slideIn 0.3s ease-out;
-            min-width: 300px;
-        }
-
-        .toast.warning {
-            border-left: 4px solid #f59e0b;
-        }
-
-        .toast.warning i {
-            color: #f59e0b;
-            font-size: 24px;
-        }
-
-        .toast-content {
-            flex: 1;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .toast-message {
-            color: #666;
-            font-size: 14px;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-        }
-
-        .toast.hiding {
-            animation: slideOut 0.3s ease-out;
-        }
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -953,27 +887,7 @@
     </div>
 
     <script>
-        // Toast notification function
-        function showToast(title, message, type) {
-            const toast = document.createElement('div');
-            toast.className = 'toast ' + type;
-            toast.innerHTML = '<i class="fas fa-exclamation-triangle"></i>' +
-                '<div class="toast-content">' +
-                    '<div class="toast-title">' + title + '</div>' +
-                    '<div class="toast-message">' + message + '</div>' +
-                '</div>';
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(function() {
-                toast.classList.add('hiding');
-                setTimeout(function() {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
-        }
-
-        // Quantity selector
+        // Quantity selector (using global showToast from header.jsp)
         const maxQuantity = <%= medicine.getQuantity() %>;
 
         function changeQuantity(change) {

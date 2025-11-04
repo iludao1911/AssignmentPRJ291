@@ -308,6 +308,7 @@
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
     <div class="container">
         <div class="logo">
             <div class="logo-icon">

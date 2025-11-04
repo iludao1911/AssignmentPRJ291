@@ -49,9 +49,22 @@ public class CheckoutServlet extends HttpServlet {
             Integer pendingOrderId = (Integer) session.getAttribute("pendingOrderId");
 
             if (pendingOrderId != null) {
-                // Load pending order và forward
-                request.getRequestDispatcher("check-out.jsp").forward(request, response);
-                return;
+                // Load pending order details từ database
+                Order pendingOrder = orderDAO.getOrderById(pendingOrderId);
+                
+                if (pendingOrder != null && "Chờ thanh toán".equals(pendingOrder.getStatus())) {
+                    // Load order details để hiển thị
+                    List<model.OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
+                    
+                    request.setAttribute("pendingOrder", pendingOrder);
+                    request.setAttribute("orderDetails", orderDetails);
+                    request.setAttribute("orderId", pendingOrderId);
+                    request.getRequestDispatcher("check-out.jsp").forward(request, response);
+                    return;
+                } else {
+                    // Order không tồn tại hoặc đã thanh toán rồi, xóa khỏi session
+                    session.removeAttribute("pendingOrderId");
+                }
             }
 
             // Nếu không có pending order, tạo mới từ giỏ hàng

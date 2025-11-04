@@ -13,6 +13,8 @@
     }
 %>
 <jsp:include page="includes/admin-header.jsp" />
+<jsp:include page="includes/toast.jsp" />
+<jsp:include page="includes/confirm-modal.jsp" />
 
 <div class="page-header">
     <h1 class="page-title">Quản lý Người dùng</h1>
@@ -137,49 +139,59 @@
     }
 
     function banUser(userId, userName) {
-        if (confirm('Bạn có chắc chắn muốn CẤM tài khoản "' + userName + '"?\n\nNgười dùng sẽ không thể đăng nhập.')) {
-            // TODO: Call API to ban user
-            fetch('<%= request.getContextPath() %>/admin/users/ban', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({userId: userId, action: 'ban'})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Thành công', 'Đã cấm tài khoản thành công!', 'success');
-                    location.reload();
-                } else {
-                    showToast('Lỗi', 'Lỗi: ' + data.message, 'error');
-                }
-            })
-            .catch(err => {
-                showToast('Thông báo', 'Chức năng đang phát triển. API chưa sẵn sàng.', 'info');
-            });
-        }
+        showConfirm(
+            'Bạn có chắc chắn muốn CẤM tài khoản "' + userName + '"?\n\nNgười dùng sẽ không thể đăng nhập.',
+            'Cấm tài khoản',
+            function(confirmed) {
+                if (!confirmed) return;
+                // TODO: Call API to ban user
+                fetch('<%= request.getContextPath() %>/admin/users/ban', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({userId: userId, action: 'ban'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Thành công', 'Đã cấm tài khoản thành công!', 'success');
+                        location.reload();
+                    } else {
+                        showToast('Lỗi', 'Lỗi: ' + data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    showToast('Thông báo', 'Chức năng đang phát triển. API chưa sẵn sàng.', 'info');
+                });
+            }
+        );
     }
 
     function unbanUser(userId, userName) {
-        if (confirm('Bạn có chắc chắn muốn MỞ KHÓA tài khoản "' + userName + '"?')) {
-            // TODO: Call API to unban user
-            fetch('<%= request.getContextPath() %>/admin/users/ban', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({userId: userId, action: 'unban'})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Thành công', 'Đã mở khóa tài khoản thành công!', 'success');
-                    location.reload();
-                } else {
-                    showToast('Lỗi', 'Lỗi: ' + data.message, 'error');
-                }
-            })
-            .catch(err => {
-                showToast('Thông báo', 'Chức năng đang phát triển. API chưa sẵn sàng.', 'info');
-            });
-        }
+        showConfirm(
+            'Bạn có chắc chắn muốn MỞ KHÓA tài khoản "' + userName + '"?',
+            'Mở khóa tài khoản',
+            function(confirmed) {
+                if (!confirmed) return;
+                // TODO: Call API to unban user
+                fetch('<%= request.getContextPath() %>/admin/users/ban', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({userId: userId, action: 'unban'})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Thành công', 'Đã mở khóa tài khoản thành công!', 'success');
+                        location.reload();
+                    } else {
+                        showToast('Lỗi', 'Lỗi: ' + data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    showToast('Thông báo', 'Chức năng đang phát triển. API chưa sẵn sàng.', 'info');
+                });
+            }
+        );
     }
 </script>
 

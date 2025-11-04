@@ -817,6 +817,7 @@
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
     <%
         // Lấy danh sách thuốc từ database
         MedicineDAO medicineDAO = new MedicineDAO();
@@ -1104,9 +1105,6 @@
             // Initialize pagination
             initPagination();
             
-            // Initialize add to cart buttons
-            initAddToCart();
-            
             // Initialize category filter
             initCategoryFilter();
             
@@ -1171,16 +1169,6 @@
             
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // Add to cart functionality
-        function initAddToCart() {
-            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const productName = this.closest('.product-card').querySelector('.product-name').textContent;
-                    showToast('Thành công', 'Đã thêm "' + productName + '" vào giỏ hàng!', 'success');
-                });
-            });
         }
 
         // Category filter functionality

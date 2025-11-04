@@ -119,6 +119,13 @@
 
         window.showToast = function(title, message, type) {
             type = type || 'info';
+            
+            // Wait for DOM ready if needed
+            if (!document.body) {
+                console.warn('showToast called before body loaded');
+                return;
+            }
+            
             var container = ensureContainer();
             var toast = document.createElement('div');
             toast.className = 'toast ' + type;

@@ -5,6 +5,7 @@ import dao.CartDAO;
 import dao.MedicineDAO;
 import model.User;
 import model.OrderDetail;
+import model.Medicine;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -76,13 +77,17 @@ public class ConfirmPaymentServlet extends HttpServlet {
             List<OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
             
             // BƯỚC 1: Kiểm tra số lượng tồn kho trước khi thanh toán
+            System.out.println("Checking stock for " + orderDetails.size() + " items...");
             for (OrderDetail detail : orderDetails) {
                 int medicineId = detail.getMedicineId();
                 int requestedQty = detail.getQuantity();
                 
+                System.out.println("Checking medicine ID: " + medicineId + ", Qty: " + requestedQty);
+                
                 // Lấy thông tin thuốc từ database
-                model.Medicine medicine = medicineDAO.getMedicineById(medicineId);
+                Medicine medicine = medicineDAO.getMedicineById(medicineId);
                 if (medicine == null) {
+                    System.err.println("Medicine not found: " + medicineId);
                     result.put("success", false);
                     result.put("message", "Sản phẩm ID " + medicineId + " không tồn tại");
                     out.print(gson.toJson(result));
@@ -90,13 +95,30 @@ public class ConfirmPaymentServlet extends HttpServlet {
                 }
                 
                 // Kiểm tra số lượng
+                System.out.println("Medicine: " + medicine.getName() + ", Stock: " + medicine.getQuantity());
                 if (medicine.getQuantity() < requestedQty) {
+                    System.err.println("Insufficient stock for: " + medicine.getName());
+                    
+                    // AUTO CANCEL ORDER when out of stock
+                    System.out.println("Auto cancelling order due to insufficient stock...");
+                    orderDAO.updateOrderStatus(pendingOrderId, "Đã hủy", "Tự động hủy: Hết hàng");
+                    
+                    // Clear cart and session
+                    cartDAO.clearCart(currentUser.getUserId());
+                    session.removeAttribute("pendingOrderId");
+                    
                     result.put("success", false);
-                    result.put("message", "Sản phẩm '" + medicine.getName() + "' chỉ còn " + medicine.getQuantity() + " (bạn đặt " + requestedQty + "). Vui lòng cập nhật giỏ hàng.");
-                    out.print(gson.toJson(result));
+                    result.put("cancelled", true);
+                    result.put("message", "Sản phẩm '" + medicine.getName() + "' chỉ còn " + medicine.getQuantity() + " (bạn đặt " + requestedQty + "). Đơn hàng đã được hủy tự động.");
+                    String jsonResponse = gson.toJson(result);
+                    System.out.println("Sending error response (order cancelled): " + jsonResponse);
+                    out.print(jsonResponse);
+                    out.flush();
                     return;
                 }
             }
+            
+            System.out.println("Stock check passed. Decreasing quantities...");
             
             // BƯỚC 2: Tất cả đều đủ hàng, bắt đầu trừ kho
             boolean allDecreased = true;
@@ -111,23 +133,29 @@ public class ConfirmPaymentServlet extends HttpServlet {
             
             // BƯỚC 3: Nếu trừ kho thành công, mới cập nhật order status
             if (allDecreased) {
+                System.out.println("All quantities decreased. Updating order status...");
                 boolean updated = orderDAO.updateOrderStatus(pendingOrderId, "Đã thanh toán", shippingAddress);
                 
                 if (updated) {
+                    System.out.println("Order status updated. Clearing cart...");
                     // Xóa giỏ hàng sau khi thanh toán thành công
                     cartDAO.clearCart(currentUser.getUserId());
 
                     // Xóa pendingOrderId khỏi session
                     session.removeAttribute("pendingOrderId");
 
+                    System.out.println("Payment confirmed successfully for order: " + pendingOrderId);
                     result.put("success", true);
                     result.put("message", "Thanh toán thành công! Đơn hàng đang chờ xác nhận.");
                     result.put("orderId", pendingOrderId);
+                    result.put("redirectUrl", "payment-success.jsp?orderId=" + pendingOrderId);
                 } else {
+                    System.err.println("Failed to update order status");
                     result.put("success", false);
                     result.put("message", "Xác nhận thanh toán thất bại");
                 }
             } else {
+                System.err.println("Failed to decrease all quantities");
                 result.put("success", false);
                 result.put("message", "Có lỗi khi cập nhật kho hàng. Vui lòng thử lại sau.");
             }
@@ -138,6 +166,9 @@ public class ConfirmPaymentServlet extends HttpServlet {
             e.printStackTrace();
         }
         
-        out.print(gson.toJson(result));
+        String jsonResponse = gson.toJson(result);
+        System.out.println("Sending final response: " + jsonResponse);
+        out.print(jsonResponse);
+        out.flush();
     }
 }

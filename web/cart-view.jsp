@@ -516,6 +516,8 @@
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
+    <jsp:include page="includes/confirm-modal.jsp" />
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -669,9 +671,13 @@
             let newQuantity = parseInt(input.value) + change;
 
             if (newQuantity < 1) {
-                if (confirm('Bạn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
-                    removeItem(medicineId);
-                }
+                showConfirm(
+                    'Bạn muốn xóa sản phẩm này khỏi giỏ hàng?',
+                    'Xóa sản phẩm',
+                    function(confirmed) {
+                        if (confirmed) removeItem(medicineId);
+                    }
+                );
                 return;
             }
 
@@ -745,33 +751,37 @@
         }
 
         function removeItem(medicineId) {
-            if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-                return;
-            }
-            
-            const params = new URLSearchParams();
-            params.append('medicineId', medicineId);
-            params.append('action', 'remove');
-            
-            fetch('cart-update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: params.toString()
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    showToast('Thông báo', data.message, 'info');
+            showConfirm(
+                'Bạn có chắc muốn xóa sản phẩm này?',
+                'Xóa sản phẩm',
+                function(confirmed) {
+                    if (!confirmed) return;
+                    
+                    const params = new URLSearchParams();
+                    params.append('medicineId', medicineId);
+                    params.append('action', 'remove');
+                    
+                    fetch('cart-update', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: params.toString()
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            showToast('Thông báo', data.message, 'info');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Lỗi', 'Có lỗi xảy ra', 'error');
+                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
-            });
+            );
         }
 
         function checkout() {

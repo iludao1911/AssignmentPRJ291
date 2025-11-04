@@ -398,6 +398,7 @@
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
     <!-- Header -->
     <header class="header">
         <div class="header-content">

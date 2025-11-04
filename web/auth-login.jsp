@@ -385,6 +385,7 @@
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
     <div class="container">
         <div class="left-panel">
             <a href="home.jsp" class="btn-back-home">

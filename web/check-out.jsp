@@ -14,46 +14,27 @@
         return;
     }
 
-    // Kiểm tra xem có orderId trong session không (từ order history)
-    Integer pendingOrderId = (Integer) session.getAttribute("pendingOrderId");
-
+    // Lấy data từ CheckoutServlet
+    Order pendingOrder = (Order) request.getAttribute("pendingOrder");
+    List<OrderDetail> orderDetails = (List<OrderDetail>) request.getAttribute("orderDetails");
     List<Cart> cartItems = (List<Cart>) request.getAttribute("cartItems");
     Double totalAmount = (Double) request.getAttribute("totalAmount");
     Integer orderId = (Integer) request.getAttribute("orderId");
 
-    // Nếu có pendingOrderId, load thông tin từ order
-    if (pendingOrderId != null && cartItems == null) {
-        try {
-            OrderDAO orderDAO = new OrderDAO();
-            Order order = orderDAO.getOrderById(pendingOrderId);
-
-            if (order != null && "Chờ thanh toán".equals(order.getStatus()) && order.getUserId() == currentUser.getUserId()) {
-                // Load order details và convert sang Cart để hiển thị
-                List<OrderDetail> orderDetails = orderDAO.getOrderDetails(pendingOrderId);
-                cartItems = new java.util.ArrayList<>();
-
-                for (OrderDetail detail : orderDetails) {
-                    Cart cart = new Cart();
-                    cart.setMedicineId(detail.getMedicineId());
-                    cart.setMedicineName(detail.getMedicineName());
-                    cart.setMedicineImage(detail.getMedicineImage());
-                    cart.setPrice(detail.getPrice());
-                    cart.setQuantity(detail.getQuantity());
-                    cart.setTotalPrice(detail.getTotalPrice());
-                    cartItems.add(cart);
-                }
-
-                totalAmount = order.getTotalAmount();
-                orderId = pendingOrderId;
-            } else {
-                response.sendRedirect("order-history.jsp");
-                return;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect("order-history.jsp");
-            return;
+    // Nếu có pendingOrder từ "continue payment", convert OrderDetail sang Cart để hiển thị
+    if (pendingOrder != null && orderDetails != null && cartItems == null) {
+        cartItems = new java.util.ArrayList<>();
+        for (OrderDetail detail : orderDetails) {
+            Cart cart = new Cart();
+            cart.setMedicineId(detail.getMedicineId());
+            cart.setMedicineName(detail.getMedicineName());
+            cart.setMedicineImage(detail.getMedicineImage());
+            cart.setPrice(detail.getPrice());
+            cart.setQuantity(detail.getQuantity());
+            cart.setTotalPrice(detail.getTotalPrice());
+            cartItems.add(cart);
         }
+        totalAmount = pendingOrder.getTotalAmount();
     }
 
     if (cartItems == null || totalAmount == null || orderId == null) {
@@ -428,6 +409,10 @@
     </style>
 </head>
 <body>
+    <!-- Global Toast Notification -->
+    <jsp:include page="includes/toast.jsp" />
+    <!-- Confirm Modal -->
+    <jsp:include page="includes/confirm-modal.jsp" />
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -634,13 +619,34 @@
                 return;
             }
             
-            if (!confirm('Xác nhận thanh toán đơn hàng này?')) {
-                return;
-            }
-            
-            const btn = document.querySelector('.confirm-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            // Show custom confirm modal instead of browser confirm
+            showConfirm(
+                'Xác nhận thanh toán đơn hàng này?',
+                'Xác nhận thanh toán',
+                function(confirmed) {
+                    if (!confirmed) return;
+                    
+                    // Get the payment button (in order-summary, not modal button)
+                    const btn = document.querySelector('.order-summary .confirm-btn');
+                    if (!btn) {
+                        console.error('Payment button not found!');
+                        return;
+                    }
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+                    processPayment(btn);
+                }
+            );
+        }
+        
+        function processPayment(btn) {
+            const form = document.getElementById('checkoutForm');
+            const receiverName = form.querySelector('[name="receiverName"]').value.trim();
+            const receiverPhone = form.querySelector('[name="receiverPhone"]').value.trim();
+            const shippingAddress = form.querySelector('[name="shippingAddress"]').value.trim();
+            const orderNote = form.querySelector('[name="orderNote"]').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
             // Gộp thông tin giao hàng
             let fullAddress = 'Người nhận: ' + receiverName + '\nSĐT: ' + receiverPhone + '\nĐịa chỉ: ' + shippingAddress;
@@ -663,11 +669,26 @@
             .then(data => {
                 if (data.success) {
                     showToast('Thành công', data.message, 'success');
-                    window.location.href = 'order-history.jsp';
+                    // Redirect to payment success page
+                    setTimeout(function() {
+                        window.location.href = data.redirectUrl || 'order-history.jsp';
+                    }, 1000);
                 } else {
-                    showToast('Lỗi', data.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Xác Nhận Thanh Toán';
+                    // Check if out of stock - auto cancel order
+                    if (data.message && data.message.includes('chỉ còn')) {
+                        showToast('Hết hàng', data.message, 'error');
+                        // Auto cancel order after 2 seconds
+                        setTimeout(function() {
+                            showToast('Thông báo', 'Đơn hàng đã được hủy tự động do hết hàng', 'warning');
+                            setTimeout(function() {
+                                window.location.href = 'cart-view.jsp';
+                            }, 2000);
+                        }, 2000);
+                    } else {
+                        showToast('Lỗi', data.message, 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-check-circle"></i> Xác Nhận Thanh Toán';
+                    }
                 }
             })
             .catch(error => {

@@ -1,46 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
-<header>
-    <nav>
-        <div class="logo">
-            <a href="${pageContext.request.contextPath}/">Pharmacy Store</a>
-        </div>
-        
-        <div class="menu">
-            <a href="${pageContext.request.contextPath}/products">Sản phẩm</a>
-            
-            <c:choose>
-                <c:when test="${sessionScope.role == 'Admin'}">
-                    <a href="${pageContext.request.contextPath}/admin/action/dashboard">Quản trị</a>
-                    <a href="${pageContext.request.contextPath}/admin/action/products">Quản lý SP</a>
-                    <a href="${pageContext.request.contextPath}/admin/action/users">Quản lý Users</a>
-                    <a href="${pageContext.request.contextPath}/admin/action/suppliers">Quản lý Nhà cung cấp</a>
-                    <a href="${pageContext.request.contextPath}/admin/action/orders">Đơn hàng</a>
-                </c:when>
-                <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/cart">Giỏ hàng</a>
-                    <a href="${pageContext.request.contextPath}/orders">Đơn hàng của tôi</a>
-                </c:otherwise>
-            </c:choose>
-        </div>
-
-        <div class="user-menu">
-            <c:choose>
-                <c:when test="${not empty sessionScope.currentCustomer}">
-                    <span>Xin chào, ${sessionScope.currentCustomer.name}</span>
-                    <a href="${pageContext.request.contextPath}/profile">Tài khoản</a>
-                    <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
-                </c:when>
-                <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>
-                    <a href="${pageContext.request.contextPath}/register">Đăng ký</a>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </nav>
-</header>
-<!-- Global toast CSS & JS -->
+<!-- Global Toast Notification System -->
 <style>
     /* Toast container */
     #global-toasts {
@@ -51,19 +10,19 @@
         flex-direction: column;
         gap: 12px;
         z-index: 10000;
-        pointer-events: none; /* allow clicks through gaps */
+        pointer-events: none;
     }
     .toast {
         pointer-events: auto;
-        min-width: 260px;
-        max-width: 420px;
+        min-width: 320px;
+        max-width: 480px;
         background: #fff;
         color: #0f172a;
-        padding: 12px 16px;
-        border-radius: 10px;
-        box-shadow: 0 6px 18px rgba(2,6,23,0.2);
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(2,6,23,0.25);
         display: flex;
-        gap: 12px;
+        gap: 14px;
         align-items: flex-start;
         border-left: 6px solid transparent;
         transform: translateX(30px);
@@ -79,7 +38,7 @@
         opacity: 0;
     }
     .toast .toast-icon {
-        font-size: 20px;
+        font-size: 26px;
         line-height: 1;
         margin-top: 2px;
     }
@@ -87,13 +46,15 @@
         flex: 1;
     }
     .toast .toast-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        font-size: 16px;
+        letter-spacing: -0.01em;
     }
     .toast .toast-message {
-        font-size: 13px;
+        font-size: 14px;
         color: #334155;
+        line-height: 1.5;
     }
     .toast.success { border-left-color: #10b981; }
     .toast.warning { border-left-color: #f59e0b; }
@@ -107,6 +68,8 @@
 
 <script>
     (function(){
+        if (window.showToast) return; // Already loaded
+        
         function ensureContainer() {
             var c = document.getElementById('global-toasts');
             if (!c) {
@@ -120,7 +83,6 @@
         window.showToast = function(title, message, type) {
             type = type || 'info';
             
-            // Wait for DOM ready if needed
             if (!document.body) {
                 console.warn('showToast called before body loaded');
                 return;
@@ -132,7 +94,6 @@
 
             var icon = document.createElement('div');
             icon.className = 'toast-icon';
-            // simple icons using emoji for reliability
             if (type === 'success') icon.textContent = '✅';
             else if (type === 'warning') icon.textContent = '⚠️';
             else if (type === 'error') icon.textContent = '⛔';
@@ -153,10 +114,8 @@
             toast.appendChild(body);
 
             container.appendChild(toast);
-            // show with animation
             requestAnimationFrame(function(){ toast.classList.add('show'); });
 
-            // auto hide after 3s
             setTimeout(function(){
                 toast.classList.remove('show');
                 toast.classList.add('hide');

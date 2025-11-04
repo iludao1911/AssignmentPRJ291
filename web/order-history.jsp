@@ -393,6 +393,8 @@
     </style>
 </head>
 <body>
+    <jsp:include page="includes/toast.jsp" />
+    <jsp:include page="includes/confirm-modal.jsp" />
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -535,23 +537,26 @@
                         </div>
                         <% } %>
 
-                        <% if (canContinuePayment) { %>
-                        <div class="order-address">
-                            <button class="continue-payment-btn" onclick="continuePayment(<%= order.getOrderId() %>)">
+                        <div class="order-actions" style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="view-detail-btn" onclick="viewOrderDetail(<%= order.getOrderId() %>)" style="flex: 1; padding: 10px 20px; background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                                <i class="fas fa-file-invoice"></i>
+                                Xem chi tiết
+                            </button>
+                            
+                            <% if (canContinuePayment) { %>
+                            <button class="continue-payment-btn" onclick="continuePayment(<%= order.getOrderId() %>)" style="flex: 1;">
                                 <i class="fas fa-credit-card"></i>
                                 Tiếp tục thanh toán
                             </button>
-                        </div>
-                        <% } %>
+                            <% } %>
 
-                        <% if (canConfirmReceived) { %>
-                        <div class="order-address">
-                            <button class="confirm-received-btn" onclick="confirmReceived(<%= order.getOrderId() %>)">
+                            <% if (canConfirmReceived) { %>
+                            <button class="confirm-received-btn" onclick="confirmReceived(<%= order.getOrderId() %>)" style="flex: 1;">
                                 <i class="fas fa-check-circle"></i>
                                 Đã nhận được hàng
                             </button>
+                            <% } %>
                         </div>
-                        <% } %>
                     </div>
                 </div>
             <% 
@@ -641,34 +646,142 @@
         }
 
         function confirmReceived(orderId) {
-            if (!confirm('Xác nhận bạn đã nhận được hàng?')) {
-                return;
+            showConfirm(
+                'Xác nhận bạn đã nhận được hàng?',
+                'Xác nhận nhận hàng',
+                function(confirmed) {
+                    if (!confirmed) return;
+
+                    const params = new URLSearchParams();
+                    params.append('orderId', orderId);
+                    params.append('action', 'confirm-received');
+
+                    fetch('update-order-status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: params.toString()
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Thành công', 'Cảm ơn bạn! Đơn hàng đã được xác nhận hoàn thành.', 'success');
+                            location.reload();
+                        } else {
+                            showToast('Lỗi', data.message || 'Có lỗi xảy ra', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Lỗi', 'Có lỗi xảy ra khi xác nhận đơn hàng', 'error');
+                    });
+                }
+            );
+        }
+        
+        // View order detail modal
+        function viewOrderDetail(orderId) {
+            fetch('order-details?orderId=' + orderId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayOrderDetailsModal(data.order);
+                    } else {
+                        showToast('Lỗi', data.message || 'Không thể lấy thông tin đơn hàng', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Lỗi', 'Có lỗi xảy ra khi lấy thông tin đơn hàng', 'error');
+                });
+        }
+
+        function displayOrderDetailsModal(order) {
+            const statusColors = {
+                'Chờ thanh toán': '#ffc107',
+                'Đã thanh toán': '#17a2b8',
+                'Đang giao': '#007bff',
+                'Hoàn thành': '#28a745',
+                'Đã hủy': '#dc3545'
+            };
+            
+            const statusColor = statusColors[order.status] || '#6c757d';
+            
+            let itemsHtml = '';
+            order.items.forEach(function(item) {
+                let imgPath = item.medicineImage || 'default-medicine.png';
+                if (!imgPath.startsWith('image/')) {
+                    imgPath = 'image/' + imgPath;
+                }
+                itemsHtml += '<div style="display: flex; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 12px;">' +
+                    '<img src="' + imgPath + '" alt="' + item.medicineName + '" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">' +
+                    '<div style="flex: 1;">' +
+                        '<h4 style="margin: 0 0 8px 0; color: #333;">' + item.medicineName + '</h4>' +
+                        '<p style="color: #666; margin: 4px 0; font-size: 14px;">Đơn giá: ' + item.unitPrice.toLocaleString('vi-VN') + 'đ</p>' +
+                        '<p style="color: #666; margin: 4px 0; font-size: 14px;">Số lượng: ' + item.quantity + '</p>' +
+                        '<p style="color: #14b8a6; margin: 8px 0 0 0; font-weight: 600; font-size: 15px;">Thành tiền: ' + item.subtotal.toLocaleString('vi-VN') + 'đ</p>' +
+                    '</div>' +
+                '</div>';
+            });
+
+            const modalHtml = '<div id="orderDetailModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;" onclick="closeOrderModal(event)">' +
+                '<div style="background: white; border-radius: 16px; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">' +
+                    '<div style="padding: 24px; border-bottom: 1px solid #e5e7eb;">' +
+                        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                            '<h2 style="margin: 0; color: #333; font-size: 24px;">Chi Tiết Đơn Hàng</h2>' +
+                            '<button onclick="closeOrderModal()" style="background: none; border: none; font-size: 28px; color: #999; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="padding: 24px;">' +
+                        '<div style="margin-bottom: 25px;">' +
+                            '<div style="display: flex; justify-content: space-between; margin-bottom: 15px;">' +
+                                '<div><p style="color: #666; margin-bottom: 5px;">Mã đơn hàng</p><p style="font-weight: 600; color: #333; font-size: 18px;">#' + order.orderId + '</p></div>' +
+                                '<div style="text-align: right;"><p style="color: #666; margin-bottom: 5px;">Ngày đặt</p><p style="font-weight: 600; color: #333;">' + order.orderDate + '</p></div>' +
+                            '</div>' +
+                            '<div style="padding: 12px; background: ' + statusColor + '20; border-left: 4px solid ' + statusColor + '; border-radius: 6px;">' +
+                                '<p style="margin: 0; color: ' + statusColor + '; font-weight: 600;">Trạng thái: ' + order.status + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="margin-bottom: 25px;">' +
+                            '<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Sản phẩm đã đặt</h3>' +
+                            itemsHtml +
+                        '</div>' +
+                        '<div style="margin-bottom: 25px;">' +
+                            '<h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Thông tin giao hàng</h3>' +
+                            '<div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">' +
+                                '<p style="margin: 8px 0; color: #555;"><i class="fas fa-user" style="width: 20px; color: #14b8a6;"></i> ' + order.customerName + '</p>' +
+                                '<p style="margin: 8px 0; color: #555;"><i class="fas fa-envelope" style="width: 20px; color: #14b8a6;"></i> ' + order.customerEmail + '</p>' +
+                                '<p style="margin: 8px 0; color: #555;"><i class="fas fa-map-marker-alt" style="width: 20px; color: #14b8a6;"></i> ' + order.shippingAddress.replace(/\n/g, '<br>') + '</p>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; padding: 20px; border-radius: 8px;">' +
+                            '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                                '<span style="font-size: 18px; font-weight: 600;">Tổng cộng:</span>' +
+                                '<span style="font-size: 28px; font-weight: 700;">' + order.totalAmount.toLocaleString('vi-VN') + 'đ</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+            // Remove existing modal if any
+            const existingModal = document.getElementById('orderDetailModal');
+            if (existingModal) {
+                existingModal.remove();
             }
 
-            const params = new URLSearchParams();
-            params.append('orderId', orderId);
-            params.append('action', 'confirm-received');
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
 
-            fetch('update-order-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: params.toString()
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Thành công', 'Cảm ơn bạn! Đơn hàng đã được xác nhận hoàn thành.', 'success');
-                    location.reload();
-                } else {
-                    showToast('Lỗi', data.message || 'Có lỗi xảy ra', 'error');
+        function closeOrderModal(event) {
+            if (!event || event.target.id === 'orderDetailModal') {
+                const modal = document.getElementById('orderDetailModal');
+                if (modal) {
+                    modal.remove();
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showToast('Lỗi', 'Có lỗi xảy ra khi xác nhận đơn hàng', 'error');
-            });
+            }
         }
     </script>
 

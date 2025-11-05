@@ -70,8 +70,8 @@ public class OrderDetailServlet extends HttpServlet {
                 return;
             }
             
-            // Check if order belongs to current user (security)
-            if (order.getUserId() != currentUser.getUserId()) {
+            // Check if order belongs to current user OR user is admin (security)
+            if (order.getUserId() != currentUser.getUserId() && !currentUser.isAdmin()) {
                 result.put("success", false);
                 result.put("message", "Bạn không có quyền xem đơn hàng này");
                 out.print(gson.toJson(result));

@@ -259,4 +259,18 @@ public class UserDAO {
             return rowsAffected > 0;
         }
     }
+
+    /**
+     * Cấm tài khoản (set is_verified = 0)
+     */
+    public boolean banUser(int userId) throws SQLException {
+        return updateVerified(userId, false);
+    }
+
+    /**
+     * Mở khóa tài khoản (set is_verified = 1)
+     */
+    public boolean unbanUser(int userId) throws SQLException {
+        return updateVerified(userId, true);
+    }
 }

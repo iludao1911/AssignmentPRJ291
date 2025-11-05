@@ -1,13 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="model.Order" %>
 <%@ page import="java.util.List" %>
+<%@ page import="dao.OrderDAO" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%
     request.setAttribute("pageTitle", "Quản lý Đơn hàng");
     request.setAttribute("page", "orders");
+    
+    // Load all orders for admin
+    OrderDAO orderDAO = new OrderDAO();
+    List<Order> allOrders = orderDAO.getAllOrders();
+    request.setAttribute("orders", allOrders);
 %>
 <jsp:include page="../includes/admin-header.jsp" />
+<jsp:include page="../includes/toast.jsp" />
 
 <div class="page-header">
     <h1 class="page-title">Quản lý Đơn hàng</h1>
@@ -271,22 +278,30 @@
         }
         document.getElementById('modalOrderStatus').innerHTML = statusHtml;
         
-        // Load order items via AJAX
-        fetch('${pageContext.request.contextPath}/admin/orders?action=getDetails&id=' + orderId)
+        // Load order items via AJAX using existing OrderDetailServlet
+        fetch('${pageContext.request.contextPath}/order-details?orderId=' + orderId)
             .then(response => response.json())
             .then(data => {
-                let itemsHtml = '<table style="width: 100%; border-collapse: collapse;">';
-                itemsHtml += '<tr style="background: #dee2e6; font-weight: 600;"><td style="padding: 10px;">Sản phẩm</td><td style="padding: 10px; text-align: center;">SL</td><td style="padding: 10px; text-align: right;">Giá</td><td style="padding: 10px; text-align: right;">Tổng</td></tr>';
-                data.items.forEach(item => {
-                    itemsHtml += '<tr style="border-bottom: 1px solid #dee2e6;">';
-                    itemsHtml += '<td style="padding: 10px;">' + item.medicineName + '</td>';
-                    itemsHtml += '<td style="padding: 10px; text-align: center;">' + item.quantity + '</td>';
-                    itemsHtml += '<td style="padding: 10px; text-align: right;">' + item.price.toLocaleString() + '₫</td>';
-                    itemsHtml += '<td style="padding: 10px; text-align: right; font-weight: 600;">' + (item.price * item.quantity).toLocaleString() + '₫</td>';
-                    itemsHtml += '</tr>';
-                });
-                itemsHtml += '</table>';
-                document.getElementById('modalOrderItems').innerHTML = itemsHtml;
+                if (data.success) {
+                    let itemsHtml = '<table style="width: 100%; border-collapse: collapse;">';
+                    itemsHtml += '<tr style="background: #dee2e6; font-weight: 600;"><td style="padding: 10px;">Sản phẩm</td><td style="padding: 10px; text-align: center;">SL</td><td style="padding: 10px; text-align: right;">Giá</td><td style="padding: 10px; text-align: right;">Tổng</td></tr>';
+                    data.order.items.forEach(item => {
+                        itemsHtml += '<tr style="border-bottom: 1px solid #dee2e6;">';
+                        itemsHtml += '<td style="padding: 10px;">' + item.medicineName + '</td>';
+                        itemsHtml += '<td style="padding: 10px; text-align: center;">' + item.quantity + '</td>';
+                        itemsHtml += '<td style="padding: 10px; text-align: right;">' + item.unitPrice.toLocaleString() + '₫</td>';
+                        itemsHtml += '<td style="padding: 10px; text-align: right; font-weight: 600;">' + item.subtotal.toLocaleString() + '₫</td>';
+                        itemsHtml += '</tr>';
+                    });
+                    itemsHtml += '</table>';
+                    document.getElementById('modalOrderItems').innerHTML = itemsHtml;
+                } else {
+                    document.getElementById('modalOrderItems').innerHTML = '<p style="color: #dc3545;">Không thể tải thông tin sản phẩm</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('modalOrderItems').innerHTML = '<p style="color: #dc3545;">Lỗi khi tải dữ liệu</p>';
             });
         
         document.getElementById('modalTotalAmount').textContent = order.totalAmount.toLocaleString() + '₫';

@@ -264,13 +264,13 @@ public class UserDAO {
      * Cấm tài khoản (set is_verified = 0)
      */
     public boolean banUser(int userId) throws SQLException {
-        return updateVerified(userId, false);
+        return updateVerifiedStatus(userId, false);
     }
 
     /**
      * Mở khóa tài khoản (set is_verified = 1)
      */
     public boolean unbanUser(int userId) throws SQLException {
-        return updateVerified(userId, true);
+        return updateVerifiedStatus(userId, true);
     }
 }

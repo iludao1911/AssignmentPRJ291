@@ -47,8 +47,14 @@ public class OrderDetailServlet extends HttpServlet {
                 out.print(gson.toJson(result));
                 return;
             }
-            
+
             User currentUser = (User) session.getAttribute("currentUser");
+            // Debug logging to help trace admin view issues
+            try {
+                System.out.println("[OrderDetailServlet] Request by user: " + (currentUser != null ? currentUser.getUserId() + " (" + currentUser.getEmail() + ")" : "null"));
+            } catch (Exception e) {
+                // swallow logging exceptions
+            }
             String orderIdStr = request.getParameter("orderId");
             
             if (orderIdStr == null || orderIdStr.trim().isEmpty()) {
@@ -59,6 +65,7 @@ public class OrderDetailServlet extends HttpServlet {
             }
             
             int orderId = Integer.parseInt(orderIdStr);
+            System.out.println("[OrderDetailServlet] Requested orderId=" + orderId);
             
             // Get order
             Order order = orderDAO.getOrderById(orderId);
@@ -72,10 +79,13 @@ public class OrderDetailServlet extends HttpServlet {
             
             // Check if order belongs to current user OR user is admin (security)
             if (order.getUserId() != currentUser.getUserId() && !currentUser.isAdmin()) {
+                System.out.println("[OrderDetailServlet] Access denied. Order.userId=" + order.getUserId() + " | currentUserId=" + currentUser.getUserId() + " | isAdmin=" + currentUser.isAdmin());
                 result.put("success", false);
                 result.put("message", "Bạn không có quyền xem đơn hàng này");
                 out.print(gson.toJson(result));
                 return;
+            } else {
+                System.out.println("[OrderDetailServlet] Access granted for orderId=" + order.getOrderId());
             }
             
             // Get order details

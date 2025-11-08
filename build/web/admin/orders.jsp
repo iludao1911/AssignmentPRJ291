@@ -96,7 +96,7 @@
                             <span style="background: ${order.status == 'Chờ thanh toán' ? '#fff3cd' : order.status == 'Đã thanh toán' ? '#d1ecf1' : order.status == 'Đang giao' ? '#cfe2ff' : order.status == 'Hoàn thành' ? '#d4edda' : '#f8d7da'}; color: ${order.status == 'Chờ thanh toán' ? '#856404' : order.status == 'Đã thanh toán' ? '#0c5460' : order.status == 'Đang giao' ? '#084298' : order.status == 'Hoàn thành' ? '#155724' : '#721c24'}; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block;">${order.status}</span>
                         </td>
                         <td style="padding: 15px; text-align: center;">
-                            <button onclick="viewOrderDetail(${order.orderId})" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-right: 5px;">
+                            <button onclick="viewOrderDetail(<c:out value='${order.orderId}'/>)" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; margin-right: 5px;">
                                 <i class="fas fa-eye"></i> Xem
                             </button>
                             <c:if test="${order.status == 'Đã thanh toán'}">

@@ -77,7 +77,7 @@ public class OrderDetailServlet extends HttpServlet {
                 return;
             }
             
-            // Check if order belongs to current user OR user is admin (security)
+            // Check if user has permission: admin OR order owner
             if (order.getUserId() != currentUser.getUserId() && !currentUser.isAdmin()) {
                 System.out.println("[OrderDetailServlet] Access denied. Order.userId=" + order.getUserId() + " | currentUserId=" + currentUser.getUserId() + " | isAdmin=" + currentUser.isAdmin());
                 result.put("success", false);

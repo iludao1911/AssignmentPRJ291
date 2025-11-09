@@ -169,26 +169,37 @@
         <c:forEach var="order" items="${orders}" varStatus="status">
         {
             orderId: ${order.orderId},
-            customerName: '${not empty order.userName ? order.userName : "N/A"}',
-            customerEmail: '${order.userEmail}',
-            orderDate: '<fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm"/>',
-            status: '${order.status}',
-            shippingAddress: '${not empty order.shippingAddress ? order.shippingAddress : "Chưa cập nhật"}',
+            customerName: `${not empty order.userName ? order.userName : 'N/A'}`,
+            customerEmail: `${order.userEmail}`,
+            orderDate: `<fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm"/>`,
+            status: `${order.status}`,
+            shippingAddress: `${not empty order.shippingAddress ? order.shippingAddress : 'Chưa cập nhật'}`,
             totalAmount: ${order.totalAmount}
         }<c:if test="${!status.last}">,</c:if>
         </c:forEach>
     ];
     
+    console.log('[Admin Orders] ordersData loaded:', ordersData.length, 'orders');
+    console.log('[Admin Orders] Full data:', ordersData);
+    
     // Count orders by status on page load
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('[Admin Orders] DOMContentLoaded - starting counts');
         updateCounts();
         filterOrders();
+        
+        // Attach search listener
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', filterOrders);
+        } else {
+            console.error('[Admin Orders] searchInput not found!');
+        }
     });
-    
-    document.getElementById('searchInput').addEventListener('keyup', filterOrders);
 
     function updateCounts() {
         const rows = document.querySelectorAll('.order-row');
+        console.log('[updateCounts] Found', rows.length, 'order rows');
         const counts = {all: 0, pending: 0, paid: 0, shipped: 0, done: 0, cancelled: 0};
         
         rows.forEach(row => {
@@ -207,6 +218,7 @@
         document.getElementById('count-shipped').textContent = counts.shipped;
         document.getElementById('count-done').textContent = counts.done;
         document.getElementById('count-cancelled').textContent = counts.cancelled;
+        console.log('[updateCounts] Counts updated:', counts);
     }
     
     function filterByTab(button, status) {
@@ -247,8 +259,14 @@
     }
     
     function viewOrderDetail(orderId) {
+        console.log('[viewOrderDetail] Called with orderId:', orderId);
+        console.log('[viewOrderDetail] ordersData:', ordersData);
         const order = ordersData.find(o => o.orderId === orderId);
-        if (!order) return;
+        console.log('[viewOrderDetail] Found order:', order);
+        if (!order) {
+            console.error('[viewOrderDetail] Order not found in ordersData!');
+            return;
+        }
         
         // Fill modal data
         document.getElementById('modalOrderId').textContent = '#' + order.orderId;

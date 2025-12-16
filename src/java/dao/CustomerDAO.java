@@ -1,9 +1,9 @@
 package dao;
 
-import model.Customer;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import model.Customer;
 
 public class CustomerDAO {
     // CÁC CÂU TRUY VẤN SQL
@@ -87,7 +87,9 @@ public class CustomerDAO {
                 }
             }
         }
+        //đ
         return customer;
+        //đâsf
     }
 
     public boolean isEmailExists(String email) throws SQLException {

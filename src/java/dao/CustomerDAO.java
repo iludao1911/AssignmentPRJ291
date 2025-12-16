@@ -7,6 +7,7 @@ import java.util.List;
 
 public class CustomerDAO {
     // CÁC CÂU TRUY VẤN SQL
+    //abc
     private static final String SELECT_ALL = "SELECT * FROM Customer WHERE role = 'Customer'";
     private static final String SELECT_BY_ID = "SELECT * FROM Customer WHERE Customer_id = ?";
     private static final String INSERT_SQL = "INSERT INTO Customer (name, email, phone, password, role) VALUES (?, ?, ?, ?, ?)";
